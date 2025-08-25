@@ -41,7 +41,7 @@ export default async function DashboardPage() {
     <div className="flex flex-col gap-4">
       <section>
         <h1 className="text-xl font-bold tracking-tight mb-3">Tổng quan</h1>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5">
               <CardTitle className="text-xs font-medium">Tổng số phòng</CardTitle>
@@ -92,24 +92,24 @@ export default async function DashboardPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Tên phòng</TableHead>
-                <TableHead>Người quản lý</TableHead>
-                <TableHead className="text-right">Tài sản</TableHead>
+                <TableHead className="text-[10px]">Tên phòng</TableHead>
+                <TableHead className="text-[10px]">Người quản lý</TableHead>
+                <TableHead className="text-right text-[10px]">Tài sản</TableHead>
                 <TableHead className="w-[60px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {rooms.map((room) => (
                 <TableRow key={room.id}>
-                  <TableCell className="font-medium">{room.name}</TableCell>
-                  <TableCell>{getManagerName(room.managerId)}</TableCell>
+                  <TableCell className="font-medium text-[11px]">{room.name}</TableCell>
+                  <TableCell className="text-[11px]">{getManagerName(room.managerId)}</TableCell>
                   <TableCell className="text-right">
                     <Badge variant="secondary">
                       {getAssetCountForRoom(room.id)}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button asChild variant="outline" size="sm">
+                    <Button asChild variant="outline" size="sm" className="h-7 px-2 text-[10px]">
                       <Link href={`/rooms/${room.id}`}>Xem</Link>
                     </Button>
                   </TableCell>
