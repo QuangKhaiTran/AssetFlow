@@ -12,19 +12,19 @@ import { Bell } from "lucide-react";
 
 export function Header() {
   return (
-    <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-card px-4 sm:px-6">
+    <header className="sticky top-0 z-10 flex h-12 items-center gap-4 border-b bg-card px-4 sm:px-6">
       <div className="flex-1">
         {/* Can add breadcrumbs or page title here */}
       </div>
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon">
-          <Bell className="h-5 w-5" />
+      <div className="flex items-center gap-2">
+        <Button variant="ghost" size="icon" className="h-8 w-8">
+          <Bell className="h-4 w-4" />
           <span className="sr-only">Thông báo</span>
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-              <Avatar className="h-9 w-9">
+              <Avatar className="h-8 w-8">
                 <AvatarImage src="https://i.pravatar.cc/150?u=a042581f4e29026704d" alt="User avatar" />
                 <AvatarFallback>NA</AvatarFallback>
               </Avatar>
