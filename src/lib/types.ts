@@ -6,6 +6,7 @@ export interface Asset {
   roomId: string;
   status: AssetStatus;
   dateAdded: string;
+  assetTypeId: string;
 }
 
 export interface Room {
@@ -15,6 +16,11 @@ export interface Room {
 }
 
 export interface User {
+  id: string;
+  name: string;
+}
+
+export interface AssetType {
   id: string;
   name: string;
 }

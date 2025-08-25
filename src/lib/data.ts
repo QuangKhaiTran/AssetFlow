@@ -1,4 +1,4 @@
-import { type Asset, type Room, type User } from "./types";
+import { type Asset, type Room, type User, type AssetType } from "./types";
 
 export const users: User[] = [
   { id: "user-1", name: "Nguyễn Văn A" },
@@ -13,16 +13,28 @@ export const rooms: Room[] = [
   { id: "room-4", name: "Sảnh chính", managerId: "user-1" },
 ];
 
+export const assetTypes: AssetType[] = [
+    { id: 'type-1', name: 'Bàn họp' },
+    { id: 'type-2', name: 'Ghế xoay' },
+    { id: 'type-3', name: 'Máy in Laser' },
+    { id: 'type-4', name: 'Máy chiếu' },
+    { id: 'type-5', name: 'Bảng trắng' },
+    { id: 'type-6', name: 'Ghế văn phòng' },
+    { id: 'type-7', name: 'Máy tính để bàn' },
+    { id: 'type-8', name: 'Kính hiển vi' },
+    { id: 'type-9', name: 'Tủ đựng hóa chất' },
+]
+
 export const assets: Asset[] = [
-  { id: "asset-1", name: "Bàn họp", roomId: "room-1", status: "Đang sử dụng", dateAdded: "2023-01-15" },
-  { id: "asset-2", name: "Ghế xoay", roomId: "room-2", status: "Đang sử dụng", dateAdded: "2023-02-20" },
-  { id: "asset-3", name: "Máy in Laser", roomId: "room-2", status: "Đang sửa chữa", dateAdded: "2023-03-10" },
-  { id: "asset-4", name: "Máy chiếu", roomId: "room-1", status: "Bị hỏng", dateAdded: "2023-04-05" },
-  { id: "asset-5", name: "Bảng trắng", roomId: "room-1", status: "Đang sử dụng", dateAdded: "2023-01-15" },
-  { id: "asset-6", name: "Ghế văn phòng", roomId: "room-2", status: "Đã thanh lý", dateAdded: "2022-11-30" },
-  { id: "asset-7", name: "Máy tính để bàn", roomId: "room-2", status: "Đang sử dụng", dateAdded: "2023-05-01" },
-  { id: "asset-8", name: "Kính hiển vi", roomId: "room-3", status: "Đang sử dụng", dateAdded: "2023-06-12" },
-  { id: "asset-9", name: "Tủ đựng hóa chất", roomId: "room-3", status: "Đang sử dụng", dateAdded: "2023-06-12" },
+  { id: "asset-1", name: "Bàn họp", roomId: "room-1", status: "Đang sử dụng", dateAdded: "2023-01-15", assetTypeId: "type-1" },
+  { id: "asset-2", name: "Ghế xoay", roomId: "room-2", status: "Đang sử dụng", dateAdded: "2023-02-20", assetTypeId: "type-2" },
+  { id: "asset-3", name: "Máy in Laser", roomId: "room-2", status: "Đang sửa chữa", dateAdded: "2023-03-10", assetTypeId: "type-3" },
+  { id: "asset-4", name: "Máy chiếu", roomId: "room-1", status: "Bị hỏng", dateAdded: "2023-04-05", assetTypeId: "type-4" },
+  { id: "asset-5", name: "Bảng trắng", roomId: "room-1", status: "Đang sử dụng", dateAdded: "2023-01-15", assetTypeId: "type-5" },
+  { id: "asset-6", name: "Ghế văn phòng", roomId: "room-2", status: "Đã thanh lý", dateAdded: "2022-11-30", assetTypeId: "type-6" },
+  { id: "asset-7", name: "Máy tính để bàn", roomId: "room-2", status: "Đang sử dụng", dateAdded: "2023-05-01", assetTypeId: "type-7" },
+  { id: "asset-8", name: "Kính hiển vi", roomId: "room-3", status: "Đang sử dụng", dateAdded: "2023-06-12", assetTypeId: "type-8" },
+  { id: "asset-9", name: "Tủ đựng hóa chất", roomId: "room-3", status: "Đang sử dụng", dateAdded: "2023-06-12", assetTypeId: "type-9" },
 ];
 
 export async function getAssets(): Promise<Asset[]> {
@@ -51,4 +63,8 @@ export async function getUsers(): Promise<User[]> {
 
 export async function getUserById(id: string): Promise<User | undefined> {
     return Promise.resolve(users.find(user => user.id === id));
+}
+
+export async function getAssetTypes(): Promise<AssetType[]> {
+    return Promise.resolve(assetTypes);
 }

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { assets, rooms } from './data';
+import { assets, rooms, assetTypes } from './data';
 import { type Asset, type AssetStatus } from './types';
 
 // Schema for adding a room
@@ -33,6 +33,7 @@ const AddAssetSchema = z.object({
     name: z.string().min(1),
     quantity: z.number().int().min(1),
     roomId: z.string().min(1),
+    assetTypeId: z.string().min(1),
 });
 
 export async function addAsset(formData: z.infer<typeof AddAssetSchema>): Promise<{ newAssets: Pick<Asset, 'id' | 'name'>[] }> {
@@ -40,7 +41,7 @@ export async function addAsset(formData: z.infer<typeof AddAssetSchema>): Promis
     if (!validatedData.success) {
         throw new Error('Dữ liệu không hợp lệ.');
     }
-    const { name, quantity, roomId } = validatedData.data;
+    const { name, quantity, roomId, assetTypeId } = validatedData.data;
     const newAssets: Pick<Asset, 'id' | 'name'>[] = [];
 
     for (let i = 0; i < quantity; i++) {
@@ -50,12 +51,14 @@ export async function addAsset(formData: z.infer<typeof AddAssetSchema>): Promis
             roomId,
             status: 'Đang sử dụng' as AssetStatus,
             dateAdded: new Date().toISOString().split('T')[0],
+            assetTypeId: assetTypeId,
         };
         assets.unshift(newAsset);
         newAssets.push({ id: newAsset.id, name: newAsset.name });
     }
     
     revalidatePath(`/rooms/${roomId}`);
+    revalidatePath('/asset-management');
     revalidatePath('/');
     return { newAssets };
 }
@@ -82,6 +85,7 @@ export async function updateAssetStatus(formData: z.infer<typeof UpdateAssetStat
     assets[assetIndex].status = status;
     revalidatePath(`/assets/${assetId}`);
     revalidatePath(`/rooms/${assets[assetIndex].roomId}`);
+    revalidatePath('/asset-management');
     revalidatePath('/');
     return { message: 'Cập nhật trạng thái tài sản thành công.' };
 }
@@ -111,6 +115,29 @@ export async function moveAsset(formData: z.infer<typeof MoveAssetSchema>) {
     revalidatePath(`/assets/${assetId}`);
     revalidatePath(`/rooms/${oldRoomId}`);
     revalidatePath(`/rooms/${newRoomId}`);
+    revalidatePath('/asset-management');
     revalidatePath('/');
     return { message: 'Di dời tài sản thành công.' };
+}
+
+// Schema for adding an asset type
+const AddAssetTypeSchema = z.object({
+  name: z.string().min(1, 'Tên loại tài sản là bắt buộc.'),
+});
+
+export async function addAssetType(formData: z.infer<typeof AddAssetTypeSchema>) {
+  const validatedData = AddAssetTypeSchema.safeParse(formData);
+  if (!validatedData.success) {
+    throw new Error('Dữ liệu không hợp lệ.');
+  }
+  
+  const { name } = validatedData.data;
+
+  const newAssetType = {
+    id: `type-${Date.now()}`,
+    name,
+  };
+  assetTypes.unshift(newAssetType);
+  revalidatePath('/asset-management');
+  return { message: 'Đã thêm loại tài sản thành công.' };
 }

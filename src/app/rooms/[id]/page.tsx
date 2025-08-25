@@ -1,4 +1,4 @@
-import { getRoomById, getAssetsByRoomId, getUserById } from '@/lib/data';
+import { getRoomById, getAssetsByRoomId, getUserById, getAssetTypes } from '@/lib/data';
 import { notFound } from 'next/navigation';
 import {
   Card,
@@ -37,6 +37,7 @@ export default async function RoomDetailPage({ params }: { params: { id: string 
 
   const assets = await getAssetsByRoomId(params.id);
   const manager = await getUserById(room.managerId);
+  const assetTypes = await getAssetTypes();
 
   return (
     <div className="flex flex-col gap-8">
@@ -63,7 +64,7 @@ export default async function RoomDetailPage({ params }: { params: { id: string 
                 <CardTitle>Tài sản trong {room.name}</CardTitle>
                 <CardDescription>Danh sách tất cả tài sản vật lý trong phòng này.</CardDescription>
             </div>
-            <AddAssetDialog roomId={room.id}>
+            <AddAssetDialog roomId={room.id} assetTypes={assetTypes}>
               <Button>
                   <PlusCircle className="mr-2 h-4 w-4" />
                   Thêm tài sản
