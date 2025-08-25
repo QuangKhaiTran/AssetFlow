@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 const menuItems = [
   {
     href: "/",
-    label: "Bảng điều khiển",
+    label: "Tổng quan",
     icon: LayoutDashboard,
   },
   {

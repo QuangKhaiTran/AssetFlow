@@ -44,7 +44,7 @@ export default async function RoomDetailPage({ params }: { params: { id: string 
         <Button asChild variant="ghost" className="mb-4">
           <Link href="/">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Quay lại Bảng điều khiển
+            Quay lại Tổng quan
           </Link>
         </Button>
         <h1 className="text-3xl font-bold tracking-tight">{room.name}</h1>
