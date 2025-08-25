@@ -30,10 +30,10 @@ import { FileText, Printer, CheckCircle, Wrench, XCircle, Trash2 } from 'lucide-
 import type { AssetStatus } from '@/lib/types';
 
 const statusConfig: Record<AssetStatus, { icon: React.ElementType, color: string }> = {
-  'In Use': { icon: CheckCircle, color: 'text-green-600' },
-  'Under Repair': { icon: Wrench, color: 'text-amber-600' },
-  'Broken': { icon: XCircle, color: 'text-red-600' },
-  'Disposed': { icon: Trash2, color: 'text-gray-500' },
+  'Đang sử dụng': { icon: CheckCircle, color: 'text-green-600' },
+  'Đang sửa chữa': { icon: Wrench, color: 'text-amber-600' },
+  'Bị hỏng': { icon: XCircle, color: 'text-red-600' },
+  'Đã thanh lý': { icon: Trash2, color: 'text-gray-500' },
 };
 
 export default function ReportsPage() {
@@ -89,24 +89,24 @@ export default function ReportsPage() {
       <div className="flex items-center gap-4">
         <FileText className="h-8 w-8 text-primary" />
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Reports</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Báo cáo</h1>
           <p className="text-muted-foreground">
-            Generate and view asset reports by room.
+            Tạo và xem báo cáo tài sản theo phòng.
           </p>
         </div>
       </div>
 
       <Card className="no-print">
         <CardHeader>
-          <CardTitle>Select a Room</CardTitle>
+          <CardTitle>Chọn một phòng</CardTitle>
           <CardDescription>
-            Choose a room to generate an asset report.
+            Chọn một phòng để tạo báo cáo tài sản.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Select onValueChange={handleRoomChange}>
             <SelectTrigger className="w-full md:w-1/3">
-              <SelectValue placeholder="Select a room..." />
+              <SelectValue placeholder="Chọn một phòng..." />
             </SelectTrigger>
             <SelectContent>
               {rooms.map((room) => (
@@ -124,14 +124,14 @@ export default function ReportsPage() {
           <CardHeader>
              <div className="flex items-center justify-between">
                 <div>
-                    <CardTitle>Asset Report: {selectedRoom.name}</CardTitle>
+                    <CardTitle>Báo cáo tài sản: {selectedRoom.name}</CardTitle>
                     <CardDescription>
-                        Generated on {new Date().toLocaleDateString()}
+                        Tạo ngày {new Date().toLocaleDateString()}
                     </CardDescription>
                 </div>
                 <Button onClick={handlePrint} variant="outline" className="no-print">
                     <Printer className="mr-2 h-4 w-4" />
-                    Print Report
+                    In báo cáo
                 </Button>
             </div>
           </CardHeader>
@@ -139,23 +139,23 @@ export default function ReportsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Asset ID</TableHead>
-                  <TableHead>Asset Name</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Date Added</TableHead>
+                  <TableHead>Mã tài sản</TableHead>
+                  <TableHead>Tên tài sản</TableHead>
+                  <TableHead>Trạng thái</TableHead>
+                  <TableHead>Ngày thêm</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
                   <TableRow>
                     <TableCell colSpan={4} className="h-24 text-center">
-                      Loading...
+                      Đang tải...
                     </TableCell>
                   </TableRow>
                 ) : assets.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={4} className="h-24 text-center">
-                      No assets found in this room.
+                      Không tìm thấy tài sản nào trong phòng này.
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -167,9 +167,9 @@ export default function ReportsPage() {
                             <TableCell className="font-medium">{asset.name}</TableCell>
                             <TableCell>
                                 <Badge variant={
-                                    asset.status === 'In Use' ? 'default' : 
-                                    asset.status === 'Under Repair' ? 'secondary' : 
-                                    asset.status === 'Broken' ? 'destructive' : 'outline'
+                                    asset.status === 'Đang sử dụng' ? 'default' : 
+                                    asset.status === 'Đang sửa chữa' ? 'secondary' : 
+                                    asset.status === 'Bị hỏng' ? 'destructive' : 'outline'
                                 } className="capitalize">
                                     <Icon className={`mr-2 h-4 w-4 ${color}`} />
                                     {asset.status}

@@ -32,9 +32,9 @@ import { useToast } from "@/hooks/use-toast";
 import { Bot, FileText, ShieldAlert, Wrench, Loader2, Sparkles } from "lucide-react";
 
 const formSchema = z.object({
-  assetData: z.string().min(10, "Please provide more detailed asset data."),
-  inventoryData: z.string().min(10, "Please provide more detailed inventory data."),
-  reportedProblems: z.string().min(10, "Please provide more detailed problem reports."),
+  assetData: z.string().min(10, "Vui lòng cung cấp dữ liệu tài sản chi tiết hơn."),
+  inventoryData: z.string().min(10, "Vui lòng cung cấp dữ liệu kiểm kê chi tiết hơn."),
+  reportedProblems: z.string().min(10, "Vui lòng cung cấp báo cáo sự cố chi tiết hơn."),
 });
 
 export default function PredictiveMaintenancePage() {
@@ -58,11 +58,11 @@ export default function PredictiveMaintenancePage() {
       const schedule = await getPredictiveMaintenanceSchedule(data);
       setResult(schedule);
     } catch (error) {
-      console.error("Error generating maintenance schedule:", error);
+      console.error("Lỗi tạo lịch bảo trì:", error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to generate the maintenance schedule. Please try again.",
+        title: "Lỗi",
+        description: "Không thể tạo lịch bảo trì. Vui lòng thử lại.",
       });
     } finally {
       setIsLoading(false);
@@ -74,9 +74,9 @@ export default function PredictiveMaintenancePage() {
       <div className="flex items-center gap-4">
         <Bot className="h-8 w-8 text-primary" />
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">AI Predictive Maintenance</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Bảo trì dự đoán bằng AI</h1>
           <p className="text-muted-foreground">
-            Leverage AI to forecast maintenance needs and prevent downtime.
+            Tận dụng AI để dự báo nhu cầu bảo trì và ngăn ngừa thời gian chết.
           </p>
         </div>
       </div>
@@ -86,9 +86,9 @@ export default function PredictiveMaintenancePage() {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
               <CardHeader>
-                <CardTitle>Input Data</CardTitle>
+                <CardTitle>Dữ liệu đầu vào</CardTitle>
                 <CardDescription>
-                  Provide the necessary data for the AI to analyze.
+                  Cung cấp dữ liệu cần thiết để AI phân tích.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -97,10 +97,10 @@ export default function PredictiveMaintenancePage() {
                   name="assetData"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Asset Data</FormLabel>
+                      <FormLabel>Dữ liệu tài sản</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="e.g., Historical usage, performance metrics, maintenance logs..."
+                          placeholder="ví dụ: Lịch sử sử dụng, số liệu hiệu suất, nhật ký bảo trì..."
                           className="min-h-[100px]"
                           {...field}
                         />
@@ -114,10 +114,10 @@ export default function PredictiveMaintenancePage() {
                   name="inventoryData"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Inventory Data</FormLabel>
+                      <FormLabel>Dữ liệu kiểm kê</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="e.g., Asset list, quantities, current status (in use, broken)..."
+                          placeholder="ví dụ: Danh sách tài sản, số lượng, trạng thái hiện tại (đang sử dụng, hỏng)..."
                           className="min-h-[100px]"
                           {...field}
                         />
@@ -131,10 +131,10 @@ export default function PredictiveMaintenancePage() {
                   name="reportedProblems"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Reported Problems</FormLabel>
+                      <FormLabel>Các sự cố đã báo cáo</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="e.g., Records of reported issues, frequency, resolution details..."
+                          placeholder="ví dụ: Hồ sơ các vấn đề đã báo cáo, tần suất, chi tiết giải quyết..."
                           className="min-h-[100px]"
                           {...field}
                         />
@@ -149,12 +149,12 @@ export default function PredictiveMaintenancePage() {
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Analyzing...
+                      Đang phân tích...
                     </>
                   ) : (
                     <>
                      <Sparkles className="mr-2 h-4 w-4" />
-                      Generate Schedule
+                      Tạo lịch trình
                     </>
                   )}
                 </Button>
@@ -168,7 +168,7 @@ export default function PredictiveMaintenancePage() {
             <Card className="flex flex-col items-center justify-center h-full">
               <CardContent className="text-center">
                  <Loader2 className="h-16 w-16 animate-spin text-primary" />
-                 <p className="mt-4 text-muted-foreground">AI is analyzing the data. Please wait...</p>
+                 <p className="mt-4 text-muted-foreground">AI đang phân tích dữ liệu. Vui lòng đợi...</p>
               </CardContent>
             </Card>
           )}
@@ -178,7 +178,7 @@ export default function PredictiveMaintenancePage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Wrench className="h-5 w-5 text-primary" />
-                    Maintenance Schedule
+                    Lịch trình bảo trì
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="prose prose-sm dark:prose-invert whitespace-pre-wrap">
@@ -189,7 +189,7 @@ export default function PredictiveMaintenancePage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <ShieldAlert className="h-5 w-5 text-amber-500" />
-                    Risk Assessment
+                    Đánh giá rủi ro
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="prose prose-sm dark:prose-invert whitespace-pre-wrap">
@@ -200,7 +200,7 @@ export default function PredictiveMaintenancePage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <FileText className="h-5 w-5 text-indigo-500" />
-                    Recommendations
+                    Khuyến nghị
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="prose prose-sm dark:prose-invert whitespace-pre-wrap">

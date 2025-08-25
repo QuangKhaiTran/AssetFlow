@@ -22,10 +22,10 @@ import Link from 'next/link';
 import { type AssetStatus } from '@/lib/types';
 
 const statusConfig: Record<AssetStatus, { icon: React.ElementType, color: string }> = {
-    'In Use': { icon: CheckCircle, color: 'text-green-600' },
-    'Under Repair': { icon: Wrench, color: 'text-amber-600' },
-    'Broken': { icon: XCircle, color: 'text-red-600' },
-    'Disposed': { icon: Trash2, color: 'text-gray-500' },
+    'Đang sử dụng': { icon: CheckCircle, color: 'text-green-600' },
+    'Đang sửa chữa': { icon: Wrench, color: 'text-amber-600' },
+    'Bị hỏng': { icon: XCircle, color: 'text-red-600' },
+    'Đã thanh lý': { icon: Trash2, color: 'text-gray-500' },
 };
 
 export default async function RoomDetailPage({ params }: { params: { id: string } }) {
@@ -43,14 +43,14 @@ export default async function RoomDetailPage({ params }: { params: { id: string 
         <Button asChild variant="ghost" className="mb-4">
           <Link href="/">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Dashboard
+            Quay lại Bảng điều khiển
           </Link>
         </Button>
         <h1 className="text-3xl font-bold tracking-tight">{room.name}</h1>
         <div className="flex items-center gap-4 text-muted-foreground mt-2">
             <div className='flex items-center gap-2'>
                 <User className="h-4 w-4" />
-                <span>Manager: {manager?.name || 'N/A'}</span>
+                <span>Người quản lý: {manager?.name || 'N/A'}</span>
             </div>
         </div>
       </div>
@@ -59,12 +59,12 @@ export default async function RoomDetailPage({ params }: { params: { id: string 
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-                <CardTitle>Assets in {room.name}</CardTitle>
-                <CardDescription>A list of all physical assets located in this room.</CardDescription>
+                <CardTitle>Tài sản trong {room.name}</CardTitle>
+                <CardDescription>Danh sách tất cả tài sản vật lý trong phòng này.</CardDescription>
             </div>
             <Button>
                 <PlusCircle className="mr-2 h-4 w-4" />
-                Add Assets
+                Thêm tài sản
             </Button>
           </div>
         </CardHeader>
@@ -72,16 +72,16 @@ export default async function RoomDetailPage({ params }: { params: { id: string 
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Asset Name</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Date Added</TableHead>
+                <TableHead>Tên tài sản</TableHead>
+                <TableHead>Trạng thái</TableHead>
+                <TableHead>Ngày thêm</TableHead>
                 <TableHead className="w-[100px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {assets.length === 0 ? (
                 <TableRow>
-                    <TableCell colSpan={4} className="text-center h-24">No assets in this room yet.</TableCell>
+                    <TableCell colSpan={4} className="text-center h-24">Chưa có tài sản nào trong phòng này.</TableCell>
                 </TableRow>
               ) : (
                 assets.map((asset) => {
@@ -91,9 +91,9 @@ export default async function RoomDetailPage({ params }: { params: { id: string 
                             <TableCell className="font-medium">{asset.name}</TableCell>
                             <TableCell>
                             <Badge variant={
-                                asset.status === 'In Use' ? 'default' : 
-                                asset.status === 'Under Repair' ? 'secondary' : 
-                                asset.status === 'Broken' ? 'destructive' : 'outline'
+                                asset.status === 'Đang sử dụng' ? 'default' : 
+                                asset.status === 'Đang sửa chữa' ? 'secondary' : 
+                                asset.status === 'Bị hỏng' ? 'destructive' : 'outline'
                             } className="capitalize">
                                 <Icon className={`mr-2 h-4 w-4 ${color}`} />
                                 {asset.status}
@@ -107,7 +107,7 @@ export default async function RoomDetailPage({ params }: { params: { id: string 
                             </TableCell>
                             <TableCell className="text-right">
                             <Button asChild variant="outline" size="sm">
-                                <Link href={`/assets/${asset.id}`}>Details</Link>
+                                <Link href={`/assets/${asset.id}`}>Chi tiết</Link>
                             </Button>
                             </TableCell>
                         </TableRow>

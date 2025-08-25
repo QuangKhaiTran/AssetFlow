@@ -26,17 +26,17 @@ import { Button } from "./ui/button";
 const menuItems = [
   {
     href: "/",
-    label: "Dashboard",
+    label: "Bảng điều khiển",
     icon: LayoutDashboard,
   },
   {
     href: "/maintenance",
-    label: "AI Maintenance",
+    label: "Bảo trì AI",
     icon: Bot,
   },
   {
     href: "/reports",
-    label: "Reports",
+    label: "Báo cáo",
     icon: FileText,
   },
 ];
@@ -75,7 +75,7 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupLabel className="flex items-center">
             <Building className="mr-2" />
-            <span>Rooms</span>
+            <span>Phòng</span>
           </SidebarGroupLabel>
           <SidebarMenu>
              <SidebarMenuItem>
@@ -100,12 +100,12 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton className="justify-start">
-              <Settings className="mr-2 h-4 w-4" /> Settings
+              <Settings className="mr-2 h-4 w-4" /> Cài đặt
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <Button variant="ghost" className="w-full justify-start">
-              <LogOut className="mr-2 h-4 w-4" /> Logout
+              <LogOut className="mr-2 h-4 w-4" /> Đăng xuất
             </Button>
           </SidebarMenuItem>
         </SidebarMenu>

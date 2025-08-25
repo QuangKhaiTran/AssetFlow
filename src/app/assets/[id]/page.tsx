@@ -16,10 +16,10 @@ import { type AssetStatus } from '@/lib/types';
 import { CheckCircle, Wrench, XCircle, Trash2 } from 'lucide-react';
 
 const statusConfig: Record<AssetStatus, { icon: React.ElementType, color: string }> = {
-    'In Use': { icon: CheckCircle, color: 'text-green-600' },
-    'Under Repair': { icon: Wrench, color: 'text-amber-600' },
-    'Broken': { icon: XCircle, color: 'text-red-600' },
-    'Disposed': { icon: Trash2, color: 'text-gray-500' },
+    'Đang sử dụng': { icon: CheckCircle, color: 'text-green-600' },
+    'Đang sửa chữa': { icon: Wrench, color: 'text-amber-600' },
+    'Bị hỏng': { icon: XCircle, color: 'text-red-600' },
+    'Đã thanh lý': { icon: Trash2, color: 'text-gray-500' },
 };
 
 
@@ -42,7 +42,7 @@ export default async function AssetDetailPage({ params }: { params: { id: string
         <Button asChild variant="ghost" className="mb-4">
           <Link href={`/rooms/${asset.roomId}`}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to {room?.name || 'Room'}
+            Quay lại {room?.name || 'Phòng'}
           </Link>
         </Button>
       </div>
@@ -51,37 +51,37 @@ export default async function AssetDetailPage({ params }: { params: { id: string
             <Card>
                 <CardHeader>
                     <CardTitle className="text-3xl">{asset.name}</CardTitle>
-                    <CardDescription>Detailed information about the asset.</CardDescription>
+                    <CardDescription>Thông tin chi tiết về tài sản.</CardDescription>
                 </CardHeader>
                 <CardContent className="grid gap-4">
                     <div className="grid grid-cols-2 gap-4 text-sm">
                         <div className="flex items-center gap-2 text-muted-foreground">
                             <Tag className="h-4 w-4" />
-                            <span>Asset ID:</span>
+                            <span>Mã tài sản:</span>
                             <span className="font-mono text-foreground">{asset.id}</span>
                         </div>
                          <div className="flex items-center gap-2 text-muted-foreground">
                             <Calendar className="h-4 w-4" />
-                            <span>Date Added:</span>
+                            <span>Ngày thêm:</span>
                             <span className="font-medium text-foreground">{new Date(asset.dateAdded).toLocaleDateString()}</span>
                         </div>
                         <div className="flex items-center gap-2 text-muted-foreground">
                             <MapPin className="h-4 w-4" />
-                            <span>Location:</span>
+                            <span>Vị trí:</span>
                             <span className="font-medium text-foreground">{room?.name}</span>
                         </div>
                         <div className="flex items-center gap-2 text-muted-foreground">
                             <User className="h-4 w-4" />
-                            <span>Manager:</span>
+                            <span>Người quản lý:</span>
                             <span className="font-medium text-foreground">{manager?.name}</span>
                         </div>
                     </div>
                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground">Status:</span>
+                        <span className="text-sm text-muted-foreground">Trạng thái:</span>
                         <Badge variant={
-                                asset.status === 'In Use' ? 'default' : 
-                                asset.status === 'Under Repair' ? 'secondary' : 
-                                asset.status === 'Broken' ? 'destructive' : 'outline'
+                                asset.status === 'Đang sử dụng' ? 'default' : 
+                                asset.status === 'Đang sửa chữa' ? 'secondary' : 
+                                asset.status === 'Bị hỏng' ? 'destructive' : 'outline'
                             } className="capitalize">
                             <Icon className={`mr-2 h-4 w-4 ${color}`} />
                             {asset.status}
@@ -90,11 +90,11 @@ export default async function AssetDetailPage({ params }: { params: { id: string
                     <div className="flex gap-2 pt-4">
                         <Button>
                             <Move className="mr-2 h-4 w-4" />
-                            Relocate Asset
+                            Di dời tài sản
                         </Button>
                         <Button variant="outline">
                             <Edit className="mr-2 h-4 w-4" />
-                            Update Status
+                            Cập nhật trạng thái
                         </Button>
                     </div>
                 </CardContent>
@@ -105,9 +105,9 @@ export default async function AssetDetailPage({ params }: { params: { id: string
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <QrCode className="h-5 w-5"/>
-                        QR Code
+                        Mã QR
                     </CardTitle>
-                    <CardDescription>Scan to view this asset's details.</CardDescription>
+                    <CardDescription>Quét để xem chi tiết tài sản này.</CardDescription>
                 </CardHeader>
                 <CardContent className="flex items-center justify-center p-6">
                     <div className="p-4 bg-white rounded-lg border">

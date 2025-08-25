@@ -1,4 +1,4 @@
-export type AssetStatus = 'In Use' | 'Under Repair' | 'Broken' | 'Disposed';
+export type AssetStatus = 'Đang sử dụng' | 'Đang sửa chữa' | 'Bị hỏng' | 'Đã thanh lý';
 
 export interface Asset {
   id: string;

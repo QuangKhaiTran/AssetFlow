@@ -15,17 +15,17 @@ const PredictiveMaintenanceScheduleInputSchema = z.object({
   assetData: z
     .string()
     .describe(
-      'A comprehensive dataset containing historical asset information, including usage statistics, maintenance logs, and reported issues.'
+      'Một bộ dữ liệu toàn diện chứa thông tin lịch sử tài sản, bao gồm thống kê sử dụng, nhật ký bảo trì và các sự cố được báo cáo.'
     ),
   inventoryData: z
     .string()
     .describe(
-      'Detailed inventory data, listing all assets, their quantities, and current status (e.g., in use, under repair, broken, disposed of).'
+      'Dữ liệu kiểm kê chi tiết, liệt kê tất cả tài sản, số lượng và trạng thái hiện tại (ví dụ: đang sử dụng, đang sửa chữa, bị hỏng, đã thanh lý).'
     ),
   reportedProblems: z
     .string()
     .describe(
-      'A record of all reported problems related to assets, including descriptions, frequency, and resolution details.'
+      'Hồ sơ về tất cả các sự cố được báo cáo liên quan đến tài sản, bao gồm mô tả, tần suất và chi tiết giải quyết.'
     ),
 });
 export type PredictiveMaintenanceScheduleInput = z.infer<
@@ -36,17 +36,17 @@ const PredictiveMaintenanceScheduleOutputSchema = z.object({
   maintenanceSchedule: z
     .string()
     .describe(
-      'A detailed maintenance schedule outlining proactive maintenance tasks for each asset, including frequency, procedures, and priority based on predicted needs.'
+      'Một lịch trình bảo trì chi tiết phác thảo các công việc bảo trì chủ động cho mỗi tài sản, bao gồm tần suất, quy trình và mức độ ưu tiên dựa trên nhu cầu dự đoán.'
     ),
   riskAssessment: z
     .string()
     .describe(
-      'An assessment of potential risks associated with each asset, including the likelihood of failure and potential impact on operations if maintenance is not performed.'
+      'Đánh giá các rủi ro tiềm ẩn liên quan đến từng tài sản, bao gồm khả năng hỏng hóc và tác động tiềm tàng đến hoạt động nếu không được bảo trì.'
     ),
   recommendations: z
     .string()
     .describe(
-      'Specific recommendations for optimizing maintenance strategies, including suggested changes to maintenance intervals, procedures, or resource allocation.'
+      'Các khuyến nghị cụ thể để tối ưu hóa chiến lược bảo trì, bao gồm các thay đổi được đề xuất về khoảng thời gian bảo trì, quy trình hoặc phân bổ nguồn lực.'
     ),
 });
 export type PredictiveMaintenanceScheduleOutput = z.infer<
@@ -63,25 +63,25 @@ const prompt = ai.definePrompt({
   name: 'predictiveMaintenanceSchedulePrompt',
   input: {schema: PredictiveMaintenanceScheduleInputSchema},
   output: {schema: PredictiveMaintenanceScheduleOutputSchema},
-  prompt: `You are an AI assistant designed to analyze asset data and generate predictive maintenance schedules.
+  prompt: `Bạn là một trợ lý AI được thiết kế để phân tích dữ liệu tài sản và tạo lịch bảo trì dự đoán. Ngôn ngữ phản hồi phải là tiếng Việt.
 
-  Based on the provided asset data, inventory data, and reported problems, your goal is to proactively identify potential maintenance needs, minimize downtime, and optimize maintenance strategies.
+  Dựa trên dữ liệu tài sản, dữ liệu kiểm kê và các sự cố được báo cáo, mục tiêu của bạn là chủ động xác định các nhu cầu bảo trì tiềm năng, giảm thiểu thời gian chết và tối ưu hóa các chiến lược bảo trì.
 
-  Consider the following factors when generating the maintenance schedule:
-  - Historical asset usage and performance
-  - Frequency and severity of reported problems
-  - Current asset status and availability
-  - Potential risks associated with asset failure
+  Xem xét các yếu tố sau khi tạo lịch bảo trì:
+  - Lịch sử sử dụng và hiệu suất của tài sản
+  - Tần suất và mức độ nghiêm trọng của các sự cố được báo cáo
+  - Tình trạng và tính sẵn có của tài sản hiện tại
+  - Rủi ro tiềm ẩn liên quan đến hỏng hóc tài sản
 
-  Asset Data: {{{assetData}}}
-  Inventory Data: {{{inventoryData}}}
-  Reported Problems: {{{reportedProblems}}}
+  Dữ liệu tài sản: {{{assetData}}}
+  Dữ liệu kiểm kê: {{{inventoryData}}}
+  Các sự cố đã báo cáo: {{{reportedProblems}}}
 
-  Output the predictive maintenance schedule, risk assessment, and recommendations in a clear and concise format.
-  Include specific maintenance tasks, frequency, priority, and potential impact on operations.
-  Be specific, professional, and actionable with your analysis.
-  Do not be conversational.
-  Strictly adhere to the output schema.`,
+  Xuất ra lịch bảo trì dự đoán, đánh giá rủi ro và các khuyến nghị ở định dạng rõ ràng và súc tích.
+  Bao gồm các nhiệm vụ bảo trì cụ thể, tần suất, mức độ ưu tiên và tác động tiềm tàng đến hoạt động.
+  Hãy cụ thể, chuyên nghiệp và có thể hành động với phân tích của bạn.
+  Đừng nói chuyện.
+  Tuân thủ nghiêm ngặt lược đồ đầu ra.`,
 });
 
 const predictiveMaintenanceScheduleFlow = ai.defineFlow(
