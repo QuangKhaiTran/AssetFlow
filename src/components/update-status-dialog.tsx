@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { type Asset, type AssetStatus } from '@/lib/types';
+import { type Asset } from '@/lib/types';
 import {
   Dialog,
   DialogContent,
@@ -34,7 +34,7 @@ import {
 import { Loader2 } from 'lucide-react';
 import { updateAssetStatus } from '@/lib/actions';
 
-const statuses: AssetStatus[] = ['Đang sử dụng', 'Đang sửa chữa', 'Bị hỏng', 'Đã thanh lý'];
+const statuses = ['Đang sử dụng', 'Đang sửa chữa', 'Bị hỏng', 'Đã thanh lý'] as const;
 
 const formSchema = z.object({
   status: z.enum(statuses, {
@@ -70,7 +70,7 @@ export function UpdateStatusDialog({ children, asset }: UpdateStatusDialogProps)
         description: `Đã cập nhật trạng thái của tài sản "${asset.name}".`,
       });
       setOpen(false);
-    } catch (error) {
+    } catch (_error) {
       toast({
         variant: 'destructive',
         title: 'Lỗi',
@@ -90,7 +90,7 @@ export function UpdateStatusDialog({ children, asset }: UpdateStatusDialogProps)
             <DialogHeader>
               <DialogTitle>Cập nhật trạng thái</DialogTitle>
               <DialogDescription>
-                Chọn trạng thái mới cho tài sản "{asset.name}".
+                Chọn trạng thái mới cho tài sản &quot;{asset.name}&quot;.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">

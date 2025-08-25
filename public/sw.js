@@ -1,0 +1,95 @@
+const CACHE_NAME = 'assetflow-v1.1.0';
+const urlsToCache = [
+  '/',
+  '/asset-management',
+  '/scan',
+  '/reports',
+  '/users',
+  '/offline.html',
+  '/manifest.json',
+  // Static assets
+  '/icons/icon-192x192.png',
+  '/icons/icon-512x512.png',
+  // Add other static assets as needed
+];
+
+// Install event - cache resources
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then((cache) => {
+        console.log('Opened cache');
+        return cache.addAll(urlsToCache);
+      })
+  );
+  // Force the waiting service worker to become the active service worker
+  self.skipWaiting();
+});
+
+// Fetch event - serve cached content when offline
+self.addEventListener('fetch', (event) => {
+  // Skip non-GET requests
+  if (event.request.method !== 'GET') {
+    return;
+  }
+
+  event.respondWith(
+    caches.match(event.request)
+      .then((response) => {
+        // Return cached version if available
+        if (response) {
+          return response;
+        }
+        
+        // Try to fetch from network
+        return fetch(event.request)
+          .then((response) => {
+            // Don't cache non-successful responses
+            if (!response || response.status !== 200 || response.type !== 'basic') {
+              return response;
+            }
+
+            // Clone the response for caching
+            const responseToCache = response.clone();
+            
+            caches.open(CACHE_NAME)
+              .then((cache) => {
+                cache.put(event.request, responseToCache);
+              });
+
+            return response;
+          })
+          .catch(() => {
+            // If network fails, try to serve offline page for navigation requests
+            if (event.request.destination === 'document') {
+              return caches.match('/offline.html');
+            }
+          });
+      })
+  );
+});
+
+// Activate event - clean up old caches
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheName !== CACHE_NAME) {
+            console.log('Deleting old cache:', cacheName);
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
+  );
+  // Ensure the new service worker takes control immediately
+  self.clients.claim();
+});
+
+// Handle service worker updates
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});

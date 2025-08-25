@@ -83,8 +83,8 @@ export function PageHeader() {
     <div className="flex items-center gap-2">
       <Icon className="h-4 w-4 text-primary" />
       <div>
-        <h1 className="text-sm font-bold tracking-tight">{config.title}</h1>
-        <p className="text-muted-foreground text-[10px]">
+        <h1 className="text-sm md:text-base font-bold tracking-tight">{config.title}</h1>
+        <p className="text-muted-foreground text-xs">
           {config.description}
         </p>
       </div>

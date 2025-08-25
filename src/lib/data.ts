@@ -113,3 +113,18 @@ export async function getAssetTypes(): Promise<AssetType[]> {
         return [];
     }
 }
+
+export async function getAssetTypeById(id: string): Promise<AssetType | undefined> {
+    try {
+        if (!id) return undefined;
+        const assetTypeDocRef = doc(db, 'assetTypes', id);
+        const assetTypeSnap = await getDoc(assetTypeDocRef);
+        if (assetTypeSnap.exists()) {
+            return { id: assetTypeSnap.id, ...assetTypeSnap.data() } as AssetType;
+        }
+        return undefined;
+    } catch (error) {
+        console.error("Lỗi khi lấy thông tin loại tài sản:", error);
+        return undefined;
+    }
+}

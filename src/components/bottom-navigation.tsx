@@ -52,12 +52,20 @@ export function BottomNavigation() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex flex-col items-center justify-center text-[10px] gap-0.5",
-                isActive ? "text-primary" : "text-muted-foreground"
+                "flex flex-col items-center justify-center text-xs gap-0.5 transition-all duration-200",
+                isActive 
+                  ? "text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.6)] scale-105" 
+                  : "text-muted-foreground hover:text-cyan-400 hover:drop-shadow-[0_0_4px_rgba(34,211,238,0.4)]"
               )}
             >
-              <item.icon className="h-4 w-4 mb-0.5" />
-              <span>{item.label}</span>
+              <item.icon className={cn(
+                "h-4 w-4 mb-0.5 transition-all duration-200",
+                isActive ? "drop-shadow-[0_0_6px_rgba(34,211,238,0.8)]" : ""
+              )} />
+              <span className={cn(
+                "transition-all duration-200",
+                isActive ? "font-semibold" : ""
+              )}>{item.label}</span>
             </Link>
           );
         })}

@@ -1,0 +1,9 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" fill="#6699CC" rx="80"/>
+  <circle cx="256" cy="180" r="60" fill="white"/>
+  <rect x="196" y="260" width="120" height="80" fill="white" rx="10"/>
+  <rect x="216" y="280" width="20" height="40" fill="#6699CC"/>
+  <rect x="246" y="280" width="20" height="40" fill="#6699CC"/>
+  <rect x="276" y="280" width="20" height="40" fill="#6699CC"/>
+  <text x="256" y="380" font-family="Arial, sans-serif" font-size="32" font-weight="bold" text-anchor="middle" fill="white">AssetFlow</text>
+</svg>

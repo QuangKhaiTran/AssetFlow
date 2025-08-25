@@ -1,5 +1,6 @@
 
 import { getAssetTypes, getAssets } from "@/lib/data";
+import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -15,7 +16,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { AddAssetTypeDialog } from "@/components/add-asset-type-dialog";
@@ -62,10 +62,27 @@ export default async function AssetManagementPage() {
                 </TableRow>
               ) : (
                 assetTypes.map((type) => (
-                  <TableRow key={type.id}>
-                    <TableCell className="font-medium">{type.name}</TableCell>
+                  <TableRow 
+                    key={type.id}
+                    className="cursor-pointer hover:bg-muted/50 transition-colors"
+                  >
+                    <TableCell className="font-medium">
+                      <Link 
+                        href={`/asset-types/${type.id}`}
+                        className="block w-full h-full"
+                      >
+                        {type.name}
+                      </Link>
+                    </TableCell>
                     <TableCell className="text-right">
-                      <Badge variant="secondary">{getAssetCountByType(type.id)}</Badge>
+                      <Link 
+                        href={`/asset-types/${type.id}`}
+                        className="block w-full h-full"
+                      >
+                        <span className="text-xs font-medium text-muted-foreground">
+                          {getAssetCountByType(type.id)}
+                        </span>
+                      </Link>
                     </TableCell>
                   </TableRow>
                 ))

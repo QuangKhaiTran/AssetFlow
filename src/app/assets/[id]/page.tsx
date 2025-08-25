@@ -8,7 +8,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, MapPin, User, Calendar, Tag, QrCode, Move, Edit } from 'lucide-react';
 import Link from 'next/link';
 import { QRCodeComponent } from '@/components/qr-code';
@@ -25,8 +24,9 @@ const statusConfig: Record<AssetStatus, { icon: React.ElementType, color: string
 };
 
 
-export default async function AssetDetailPage({ params }: { params: { id: string } }) {
-  const asset = await getAssetById(params.id);
+export default async function AssetDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const asset = await getAssetById(id);
   if (!asset) {
     notFound();
   }
@@ -58,7 +58,7 @@ export default async function AssetDetailPage({ params }: { params: { id: string
                         <div className="flex items-center gap-1.5 text-muted-foreground">
                             <Tag className="h-3.5 w-3.5" />
                             <span>Mã tài sản:</span>
-                            <span className="font-mono text-foreground text-[10px]">{asset.id}</span>
+                            <span className="font-mono text-foreground text-xs">{asset.id}</span>
                         </div>
                          <div className="flex items-center gap-1.5 text-muted-foreground">
                             <Calendar className="h-3.5 w-3.5" />
@@ -78,14 +78,10 @@ export default async function AssetDetailPage({ params }: { params: { id: string
                     </div>
                      <div className="flex items-center gap-2">
                         <span className="text-xs text-muted-foreground">Trạng thái:</span>
-                        <Badge variant={
-                                asset.status === 'Đang sử dụng' ? 'default' : 
-                                asset.status === 'Đang sửa chữa' ? 'secondary' : 
-                                asset.status === 'Bị hỏng' ? 'destructive' : 'outline'
-                            } className="capitalize text-[10px]">
-                            <Icon className={`mr-1 h-3 w-3 ${color}`} />
-                            {asset.status}
-                        </Badge>
+                        <div className="flex items-center gap-1.5">
+                          <Icon className={`h-3.5 w-3.5 ${color}`} />
+                          <span className={`text-xs font-medium ${color}`}>{asset.status}</span>
+                        </div>
                     </div>
                     <div className="flex flex-wrap gap-2 pt-2">
                         <MoveAssetDialog asset={asset} rooms={allRooms}>

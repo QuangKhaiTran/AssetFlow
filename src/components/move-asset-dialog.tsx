@@ -69,7 +69,7 @@ export function MoveAssetDialog({ children, asset, rooms }: MoveAssetDialogProps
       });
       form.reset();
       setOpen(false);
-    } catch (error) {
+    } catch (_error) {
       toast({
         variant: 'destructive',
         title: 'Lỗi',
@@ -89,7 +89,7 @@ export function MoveAssetDialog({ children, asset, rooms }: MoveAssetDialogProps
             <DialogHeader>
               <DialogTitle>Di dời tài sản</DialogTitle>
               <DialogDescription>
-                Chọn phòng mới để di dời tài sản "{asset.name}".
+                Chọn phòng mới để di dời tài sản &quot;{asset.name}&quot;.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">

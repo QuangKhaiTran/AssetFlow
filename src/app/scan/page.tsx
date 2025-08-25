@@ -3,29 +3,73 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import jsQR from 'jsqr';
-import { QrCode, VideoOff } from 'lucide-react';
+import { QrCode, VideoOff, RefreshCw, RotateCcw, CheckCircle, Wrench, XCircle, Trash2, Calendar, Building, User, Eye } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { getAssetById, getRoomById, getUserById, getAssetTypeById } from '@/lib/data';
+import { type Asset, type Room, type User as UserType, type AssetType, type AssetStatus } from '@/lib/types';
+import { QRCodeComponent } from '@/components/qr-code';
+
+const statusConfig: Record<AssetStatus, { icon: React.ElementType, color: string }> = {
+  'Đang sử dụng': { icon: CheckCircle, color: 'text-green-600' },
+  'Đang sửa chữa': { icon: Wrench, color: 'text-amber-600' },
+  'Bị hỏng': { icon: XCircle, color: 'text-red-600' },
+  'Đã thanh lý': { icon: Trash2, color: 'text-gray-500' },
+};
 
 export default function ScanPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [scanResult, setScanResult] = useState<string | null>(null);
+  const [_scanResult, setScanResult] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(false);
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
+  const [cameras, setCameras] = useState<MediaDeviceInfo[]>([]);
+  const [currentCameraIndex, setCurrentCameraIndex] = useState(0);
+  const [currentStream, setCurrentStream] = useState<MediaStream | null>(null);
+  const [isLoadingAsset, setIsLoadingAsset] = useState(false);
+  const [assetData, setAssetData] = useState<{
+    asset: Asset;
+    room: Room | null;
+    manager: UserType | null;
+    assetType: AssetType | null;
+  } | null>(null);
   const router = useRouter();
   const { toast } = useToast();
 
   useEffect(() => {
-    const getCameraPermission = async () => {
+    const getCameraPermissionAndDevices = async () => {
       try {
+        // Get camera permission first
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
         setHasCameraPermission(true);
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
+        
+        // Get list of video devices
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = devices.filter(device => device.kind === 'videoinput');
+        setCameras(videoDevices);
+        
+        // Stop the initial stream
+        stream.getTracks().forEach(track => track.stop());
+        
+        // Find back camera (environment) or use first camera
+        let defaultCameraIndex = 0;
+        const backCameraIndex = videoDevices.findIndex(device => 
+          device.label.toLowerCase().includes('back') || 
+          device.label.toLowerCase().includes('environment') ||
+          device.label.toLowerCase().includes('rear')
+        );
+        
+        if (backCameraIndex !== -1) {
+          defaultCameraIndex = backCameraIndex;
         }
-        setIsScanning(true);
+        
+        setCurrentCameraIndex(defaultCameraIndex);
+        
+        // Start camera with selected device
+        await startCamera(videoDevices[defaultCameraIndex]?.deviceId);
+        
       } catch (error) {
         console.error('Lỗi truy cập camera:', error);
         setHasCameraPermission(false);
@@ -37,7 +81,7 @@ export default function ScanPage() {
       }
     };
 
-    getCameraPermission();
+    getCameraPermissionAndDevices();
 
     return () => {
       stopScan();
@@ -83,22 +127,105 @@ export default function ScanPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isScanning]);
 
-  const handleResult = (result: string) => {
-    // Check if the result is a valid asset ID (e.g., alphanumeric, 20 chars for Firestore ID)
-    // This is a simple check, can be made more robust.
+  const startCamera = async (deviceId?: string) => {
+    try {
+      // Stop current stream if exists
+      if (currentStream) {
+        currentStream.getTracks().forEach(track => track.stop());
+      }
+      
+      const constraints: MediaStreamConstraints = {
+        video: deviceId ? { deviceId: { exact: deviceId } } : { facingMode: 'environment' }
+      };
+      
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      setCurrentStream(stream);
+      
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+      
+      setIsScanning(true);
+    } catch (error) {
+      console.error('Lỗi khởi động camera:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Lỗi camera',
+        description: 'Không thể khởi động camera được chọn.',
+      });
+    }
+  };
+  
+  const toggleCamera = async () => {
+    if (cameras.length > 1) {
+      const nextIndex = (currentCameraIndex + 1) % cameras.length;
+      setCurrentCameraIndex(nextIndex);
+      await startCamera(cameras[nextIndex].deviceId);
+      
+      toast({
+        title: 'Chuyển đổi camera',
+        description: `Đang sử dụng ${cameras[nextIndex].label || `Camera ${nextIndex + 1}`}`,
+      });
+    }
+  };
+
+  const handleResult = async (result: string) => {
+    // Check if the result is a valid asset ID
     if (result && /^[a-zA-Z0-9]{10,}$/.test(result)) {
-        toast({
-            title: "Quét thành công!",
-            description: "Đang chuyển hướng...",
+      setIsLoadingAsset(true);
+      try {
+        // Fetch asset information
+        const asset = await getAssetById(result);
+        
+        if (!asset) {
+          throw new Error('Asset not found');
+        }
+        
+        // Fetch related information
+        const [room, assetType] = await Promise.all([
+          getRoomById(asset.roomId),
+          getAssetTypeById(asset.assetTypeId)
+        ]);
+        
+        // Fetch manager if room exists
+        const manager = room ? await getUserById(room.managerId) : null;
+        
+        setAssetData({
+          asset,
+          room: room || null,
+          manager: manager || null,
+          assetType: assetType || null
         });
-        router.push(`/assets/${result}`);
+        
+        toast({
+          title: "Quét thành công!",
+          description: "Thông tin tài sản đã được tải.",
+        });
+        
+      } catch (error) {
+        console.error('Error fetching asset:', error);
+        toast({
+          variant: "destructive",
+          title: "Lỗi tải thông tin",
+          description: "Không tìm thấy tài sản hoặc có lỗi xảy ra.",
+        });
+        
+        // Resume scanning after error
+        setTimeout(() => {
+          setScanResult(null);
+          setIsScanning(true);
+        }, 2000);
+      } finally {
+        setIsLoadingAsset(false);
+      }
     } else {
-       toast({
+      toast({
         variant: "destructive",
         title: "Mã QR không hợp lệ",
         description: `Nội dung không phải là ID tài sản hợp lệ.`,
       });
-      // Resume scanning after a short delay
+      
+      // Resume scanning after error
       setTimeout(() => {
         setScanResult(null);
         setIsScanning(true);
@@ -107,9 +234,11 @@ export default function ScanPage() {
   };
 
   const stopScan = () => {
-    if (videoRef.current && videoRef.current.srcObject) {
-      const stream = videoRef.current.srcObject as MediaStream;
-      stream.getTracks().forEach(track => track.stop());
+    if (currentStream) {
+      currentStream.getTracks().forEach(track => track.stop());
+      setCurrentStream(null);
+    }
+    if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
   };
@@ -140,6 +269,19 @@ export default function ScanPage() {
                             <div className="w-2/3 h-2/3 border-4 border-dashed border-primary/70 rounded-lg" />
                         </div>
                     )}
+                    {/* Camera Toggle Button */}
+                    {cameras.length > 1 && (
+                        <div className="absolute top-4 right-4">
+                            <Button
+                                onClick={toggleCamera}
+                                size="icon"
+                                variant="secondary"
+                                className="bg-black/50 hover:bg-black/70 text-white border-0"
+                            >
+                                <RotateCcw className="h-4 w-4" />
+                            </Button>
+                        </div>
+                    )}
                 </>
              )}
               {hasCameraPermission === null && (
@@ -151,14 +293,114 @@ export default function ScanPage() {
         </CardContent>
       </Card>
       
-      {scanResult && (
+      {/* Loading State */}
+      {isLoadingAsset && (
         <Alert>
           <QrCode className="h-4 w-4" />
-          <AlertTitle>Quét thành công</AlertTitle>
+          <AlertTitle>Đang tải thông tin...</AlertTitle>
           <AlertDescription>
-            Đã tìm thấy mã QR. Đang xử lý...
+            Vui lòng chờ trong giây lát.
           </AlertDescription>
         </Alert>
+      )}
+      
+      {/* Asset Information Display */}
+      {assetData && (
+        <div className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <QrCode className="h-5 w-5" />
+                Thông tin tài sản
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Asset Basic Info */}
+              <div className="space-y-2">
+                <h3 className="font-semibold text-sm md:text-base">{assetData.asset.name}</h3>
+                <div className="flex items-center gap-1.5">
+                  {(() => {
+                    const { icon: Icon, color } = statusConfig[assetData.asset.status];
+                    return (
+                      <>
+                        <Icon className={`h-3.5 w-3.5 ${color}`} />
+                        <span className={`text-xs font-medium ${color}`}>{assetData.asset.status}</span>
+                      </>
+                    );
+                  })()}
+                </div>
+              </div>
+              
+              {/* Asset Type */}
+              {assetData.assetType && (
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="text-muted-foreground">Loại tài sản:</span>
+                  <span className="font-medium">{assetData.assetType.name}</span>
+                </div>
+              )}
+              
+              {/* Room Information */}
+              {assetData.room && (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Building className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-muted-foreground">Phòng:</span>
+                    <span className="font-medium">{assetData.room.name}</span>
+                  </div>
+                  
+                  {assetData.manager && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <User className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-muted-foreground">Người quản lý:</span>
+                      <span className="font-medium">{assetData.manager.name}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {/* Date Added */}
+              <div className="flex items-center gap-2 text-sm">
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <span className="text-muted-foreground">Ngày thêm:</span>
+                <span className="font-medium">{new Date(assetData.asset.dateAdded).toLocaleDateString('vi-VN')}</span>
+              </div>
+              
+              {/* Asset ID QR */}
+              <div className="space-y-2">
+                <div className="text-sm text-muted-foreground">Mã QR tài sản:</div>
+                <div className="flex justify-center">
+                  <QRCodeComponent value={assetData.asset.id} size={120} />
+                </div>
+                <div className="text-center text-xs font-mono text-muted-foreground">
+                  {assetData.asset.id}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          {/* Action Buttons */}
+          <div className="flex gap-2">
+            <Button 
+              onClick={() => {
+                setAssetData(null);
+                setScanResult(null);
+                setIsScanning(true);
+              }}
+              variant="outline"
+              className="flex-1"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Quét lại
+            </Button>
+            <Button 
+              onClick={() => router.push(`/assets/${assetData.asset.id}`)}
+              className="flex-1"
+            >
+              <Eye className="h-4 w-4 mr-2" />
+              Xem chi tiết
+            </Button>
+          </div>
+        </div>
       )}
 
     </div>

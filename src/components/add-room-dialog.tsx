@@ -70,7 +70,7 @@ export function AddRoomDialog({ children, users }: AddRoomDialogProps) {
       });
       form.reset();
       setOpen(false);
-    } catch (error) {
+    } catch (_error) {
       toast({
         variant: 'destructive',
         title: 'Lỗi',

@@ -71,6 +71,52 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* Hide scrollbars globally */
+    overflow-x: hidden;
+  }
+  
+  /* Hide scrollbars for all elements */
+  * {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+  
+  *::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+  
+  /* Disable zoom/pinch */
+  html {
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    /* Prevent zoom on double tap */
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+  }
+  
+  /* Disable pinch zoom on touch devices */
+  body {
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+  }
+  
+  /* Prevent zoom on input focus (iOS) */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+  
+  /* Re-enable text selection for inputs and content areas */
+  input, textarea, [contenteditable] {
+    -webkit-user-select: text;
+    -khtml-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
   }
 }
 
@@ -81,5 +127,51 @@
   .no-scrollbar {
       -ms-overflow-style: none;  /* IE and Edge */
       scrollbar-width: none;  /* Firefox */
+  }
+  
+  /* Typography System for Consistency */
+  h1 {
+    @apply text-lg md:text-xl font-bold tracking-tight;
+  }
+  
+  h2 {
+    @apply text-base md:text-lg font-bold tracking-tight;
+  }
+  
+  h3 {
+    @apply text-sm md:text-base font-semibold;
+  }
+  
+  h4 {
+    @apply text-xs md:text-sm font-semibold;
+  }
+  
+  h5 {
+    @apply text-xs font-medium;
+  }
+  
+  h6 {
+    @apply text-xs font-medium;
+  }
+  
+  p {
+    @apply text-xs;
+  }
+  
+  /* Specific component text standards */
+  .text-mono {
+    @apply font-mono text-xs;
+  }
+  
+  .text-status {
+    @apply text-xs font-medium;
+  }
+  
+  .text-label {
+    @apply text-xs font-medium text-muted-foreground;
+  }
+  
+  .text-description {
+    @apply text-xs text-muted-foreground;
   }
 }

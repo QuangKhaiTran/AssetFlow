@@ -59,7 +59,7 @@ export function AddUserDialog({ children }: AddUserDialogProps) {
       });
       form.reset();
       setOpen(false);
-    } catch (error) {
+    } catch (_error) {
       toast({
         variant: 'destructive',
         title: 'Lỗi',

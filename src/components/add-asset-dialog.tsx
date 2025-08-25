@@ -88,7 +88,7 @@ export function AddAssetDialog({ children, roomId, assetTypes }: AddAssetDialogP
         setShowPrintDialog(true);
       }
 
-    } catch (error) {
+    } catch (_error) {
       toast({
         variant: 'destructive',
         title: 'Lỗi',

@@ -4,34 +4,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getRooms, getAssets, getUsers } from "@/lib/data";
 import { Building, Users, Box, Wrench } from "lucide-react";
-import Link from "next/link";
 import { type Asset } from "@/lib/types";
 import { AddRoomDialog } from "@/components/add-room-dialog";
+import { RoomsTable } from "@/components/rooms-table";
 
 export default async function DashboardPage() {
   const rooms = await getRooms();
   const assets = await getAssets();
   const users = await getUsers();
-
-  const getManagerName = (managerId: string) => {
-    return users.find((user) => user.id === managerId)?.name || "N/A";
-  };
-
-  const getAssetCountForRoom = (roomId: string) => {
-    return assets.filter((asset) => asset.roomId === roomId).length;
-  };
 
   const getAssetsByStatus = (status: Asset['status']) => {
     return assets.filter(asset => asset.status === status).length;
@@ -82,40 +65,13 @@ export default async function DashboardPage() {
 
       <section>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-bold tracking-tight">Phòng</h2>
+          <h2 className="text-base md:text-lg font-bold tracking-tight">Phòng</h2>
            <AddRoomDialog users={users}>
             <Button size="sm">Tạo phòng mới</Button>
           </AddRoomDialog>
         </div>
         <Card>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-2/5 text-[10px]">Tên phòng</TableHead>
-                <TableHead className="w-2/5 text-[10px]">Người quản lý</TableHead>
-                <TableHead className="w-1/5 text-center text-[10px]">Tài sản</TableHead>
-                <TableHead className="w-[80px]"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {rooms.map((room) => (
-                <TableRow key={room.id}>
-                  <TableCell className="font-medium text-[11px]">{room.name}</TableCell>
-                  <TableCell className="text-[11px]">{getManagerName(room.managerId)}</TableCell>
-                  <TableCell className="text-center">
-                    <Badge variant="secondary" className="px-2">
-                      {getAssetCountForRoom(room.id)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button asChild variant="outline" size="sm" className="h-7 px-2 text-[10px]">
-                      <Link href={`/rooms/${room.id}`}>Xem</Link>
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <RoomsTable rooms={rooms} users={users} assets={assets} />
         </Card>
       </section>
     </div>
