@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getRooms, getAssetsByRoomId, type Room, type Asset } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import {
@@ -42,9 +42,9 @@ export default function ReportsPage() {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  useState(() => {
+  useEffect(() => {
     getRooms().then(setRooms);
-  });
+  }, []);
 
   const handleRoomChange = async (roomId: string) => {
     if (!roomId) {
