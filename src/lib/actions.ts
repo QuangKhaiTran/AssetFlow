@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { assets, rooms } from './data';
-import { type AssetStatus } from './types';
+import { type Asset, type AssetStatus } from './types';
 
 // Schema for adding a room
 const AddRoomSchema = z.object({
@@ -35,12 +35,13 @@ const AddAssetSchema = z.object({
     roomId: z.string().min(1),
 });
 
-export async function addAsset(formData: z.infer<typeof AddAssetSchema>) {
+export async function addAsset(formData: z.infer<typeof AddAssetSchema>): Promise<{ newAssets: Pick<Asset, 'id' | 'name'>[] }> {
     const validatedData = AddAssetSchema.safeParse(formData);
     if (!validatedData.success) {
         throw new Error('Dữ liệu không hợp lệ.');
     }
     const { name, quantity, roomId } = validatedData.data;
+    const newAssets: Pick<Asset, 'id' | 'name'>[] = [];
 
     for (let i = 0; i < quantity; i++) {
         const newAsset = {
@@ -51,11 +52,12 @@ export async function addAsset(formData: z.infer<typeof AddAssetSchema>) {
             dateAdded: new Date().toISOString().split('T')[0],
         };
         assets.unshift(newAsset);
+        newAssets.push({ id: newAsset.id, name: newAsset.name });
     }
     
     revalidatePath(`/rooms/${roomId}`);
     revalidatePath('/');
-    return { message: `Đã thêm ${quantity} tài sản thành công.` };
+    return { newAssets };
 }
 
 // Schema for updating asset status
