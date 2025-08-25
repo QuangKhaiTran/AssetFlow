@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   FileText,
   ClipboardList,
+  QrCode,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -21,6 +22,11 @@ const menuItems = [
     icon: ClipboardList,
   },
   {
+    href: "/scan",
+    label: "Quét QR",
+    icon: QrCode,
+  },
+  {
     href: "/reports",
     label: "Báo cáo",
     icon: FileText,
@@ -32,7 +38,7 @@ export function BottomNavigation() {
 
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-card border-t z-20">
-      <div className="grid h-full grid-cols-3">
+      <div className="grid h-full grid-cols-4">
         {menuItems.map((item) => {
           const isActive = pathname === item.href;
           return (
