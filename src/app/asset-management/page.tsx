@@ -29,12 +29,12 @@ export default async function AssetManagementPage() {
   }
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6">
       <div className="flex items-center gap-4">
-        <ClipboardList className="h-8 w-8 text-primary" />
+        <ClipboardList className="h-6 w-6 text-primary" />
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Quản lý loại tài sản</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl font-bold tracking-tight">Quản lý loại tài sản</h1>
+          <p className="text-muted-foreground text-xs md:text-sm">
             Tạo và xem các loại tài sản trong hệ thống.
           </p>
         </div>
@@ -45,9 +45,9 @@ export default async function AssetManagementPage() {
           <div className="flex items-center justify-between">
             <CardTitle>Danh sách loại tài sản</CardTitle>
             <AddAssetTypeDialog>
-              <Button>
+              <Button size="sm">
                 <PlusCircle className="mr-2 h-4 w-4" />
-                Tạo loại tài sản
+                Tạo loại
               </Button>
             </AddAssetTypeDialog>
           </div>

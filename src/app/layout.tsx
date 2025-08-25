@@ -23,7 +23,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="font-body antialiased pb-16 md:pb-0">
+      <body className="font-body antialiased text-sm md:text-base pb-16 md:pb-0">
         <LayoutProvider>{children}</LayoutProvider>
         <Toaster />
       </body>

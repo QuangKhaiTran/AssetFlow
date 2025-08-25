@@ -15,17 +15,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getRooms, getAssets, getUsers } from "@/lib/data";
-import { Building, Users, Box, CheckCircle, Wrench, XCircle, Trash2 } from "lucide-react";
+import { Building, Users, Box, Wrench } from "lucide-react";
 import Link from "next/link";
 import { type Asset } from "@/lib/types";
 import { AddRoomDialog } from "@/components/add-room-dialog";
-
-const statusIcons: { [key: Asset['status']]: React.ReactNode } = {
-  "Đang sử dụng": <CheckCircle className="text-green-500" />,
-  "Đang sửa chữa": <Wrench className="text-yellow-500" />,
-  "Bị hỏng": <XCircle className="text-red-500" />,
-  "Đã thanh lý": <Trash2 className="text-gray-500" />,
-};
 
 export default async function DashboardPage() {
   const rooms = await getRooms();
@@ -45,17 +38,17 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6">
       <section>
-        <h1 className="text-3xl font-bold tracking-tight mb-4">Tổng quan</h1>
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <h1 className="text-2xl font-bold tracking-tight mb-4">Tổng quan</h1>
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Tổng số phòng</CardTitle>
               <Building className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{rooms.length}</div>
+              <div className="text-xl md:text-2xl font-bold">{rooms.length}</div>
             </CardContent>
           </Card>
           <Card>
@@ -64,7 +57,7 @@ export default async function DashboardPage() {
               <Box className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{assets.length}</div>
+              <div className="text-xl md:text-2xl font-bold">{assets.length}</div>
             </CardContent>
           </Card>
           <Card>
@@ -73,7 +66,7 @@ export default async function DashboardPage() {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{users.length}</div>
+              <div className="text-xl md:text-2xl font-bold">{users.length}</div>
             </CardContent>
           </Card>
           <Card>
@@ -82,7 +75,7 @@ export default async function DashboardPage() {
               <Wrench className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{getAssetsByStatus('Đang sửa chữa')}</div>
+              <div className="text-xl md:text-2xl font-bold">{getAssetsByStatus('Đang sửa chữa')}</div>
             </CardContent>
           </Card>
         </div>
@@ -90,9 +83,9 @@ export default async function DashboardPage() {
 
       <section>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-bold tracking-tight">Phòng</h2>
+          <h2 className="text-xl font-bold tracking-tight">Phòng</h2>
            <AddRoomDialog users={users}>
-            <Button>Tạo phòng mới</Button>
+            <Button size="sm">Tạo phòng mới</Button>
           </AddRoomDialog>
         </div>
         <Card>
@@ -101,8 +94,8 @@ export default async function DashboardPage() {
               <TableRow>
                 <TableHead>Tên phòng</TableHead>
                 <TableHead>Người quản lý</TableHead>
-                <TableHead className="text-right">Số lượng tài sản</TableHead>
-                <TableHead className="w-[100px]"></TableHead>
+                <TableHead className="text-right">Tài sản</TableHead>
+                <TableHead className="w-[80px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

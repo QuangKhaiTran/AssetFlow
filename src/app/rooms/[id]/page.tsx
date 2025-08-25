@@ -40,16 +40,16 @@ export default async function RoomDetailPage({ params }: { params: { id: string 
   const assetTypes = await getAssetTypes();
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6">
       <div>
-        <Button asChild variant="ghost" className="mb-4">
+        <Button asChild variant="ghost" className="mb-2 -ml-4">
           <Link href="/">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Quay lại Tổng quan
           </Link>
         </Button>
-        <h1 className="text-3xl font-bold tracking-tight">{room.name}</h1>
-        <div className="flex items-center gap-4 text-muted-foreground mt-2">
+        <h1 className="text-2xl font-bold tracking-tight">{room.name}</h1>
+        <div className="flex items-center gap-4 text-muted-foreground mt-2 text-xs">
             <div className='flex items-center gap-2'>
                 <User className="h-4 w-4" />
                 <span>Người quản lý: {manager?.name || 'N/A'}</span>
@@ -61,13 +61,13 @@ export default async function RoomDetailPage({ params }: { params: { id: string 
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-                <CardTitle>Tài sản trong {room.name}</CardTitle>
-                <CardDescription>Danh sách tất cả tài sản vật lý trong phòng này.</CardDescription>
+                <CardTitle>Tài sản trong phòng</CardTitle>
+                <CardDescription>Danh sách tất cả tài sản trong phòng này.</CardDescription>
             </div>
             <AddAssetDialog roomId={room.id} assetTypes={assetTypes}>
-              <Button>
+              <Button size="sm">
                   <PlusCircle className="mr-2 h-4 w-4" />
-                  Thêm tài sản
+                  Thêm
               </Button>
             </AddAssetDialog>
           </div>
@@ -79,13 +79,13 @@ export default async function RoomDetailPage({ params }: { params: { id: string 
                 <TableHead>Tên tài sản</TableHead>
                 <TableHead>Trạng thái</TableHead>
                 <TableHead>Ngày thêm</TableHead>
-                <TableHead className="w-[100px]"></TableHead>
+                <TableHead className="w-[80px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {assets.length === 0 ? (
                 <TableRow>
-                    <TableCell colSpan={4} className="text-center h-24">Chưa có tài sản nào trong phòng này.</TableCell>
+                    <TableCell colSpan={4} className="text-center h-24">Chưa có tài sản nào.</TableCell>
                 </TableRow>
               ) : (
                 assets.map((asset) => {
@@ -98,8 +98,8 @@ export default async function RoomDetailPage({ params }: { params: { id: string 
                                 asset.status === 'Đang sử dụng' ? 'default' : 
                                 asset.status === 'Đang sửa chữa' ? 'secondary' : 
                                 asset.status === 'Bị hỏng' ? 'destructive' : 'outline'
-                            } className="capitalize">
-                                <Icon className={`mr-2 h-4 w-4 ${color}`} />
+                            } className="capitalize text-xs">
+                                <Icon className={`mr-1 h-3 w-3 ${color}`} />
                                 {asset.status}
                             </Badge>
                             </TableCell>

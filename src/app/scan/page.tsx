@@ -5,8 +5,7 @@ import { useRouter } from 'next/navigation';
 import jsQR from 'jsqr';
 import { QrCode, VideoOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export default function ScanPage() {
@@ -33,7 +32,7 @@ export default function ScanPage() {
         toast({
           variant: 'destructive',
           title: 'Từ chối truy cập camera',
-          description: 'Vui lòng cho phép truy cập camera trong cài đặt trình duyệt để sử dụng tính năng này.',
+          description: 'Vui lòng cho phép truy cập camera trong cài đặt trình duyệt.',
         });
       }
     };
@@ -86,11 +85,10 @@ export default function ScanPage() {
   const handleResult = (result: string) => {
     try {
       const url = new URL(result);
-      // Basic validation if the URL is from our app
       if (url.origin === window.location.origin && url.pathname.startsWith('/assets/')) {
         toast({
           title: "Quét thành công!",
-          description: "Đang chuyển hướng đến trang tài sản...",
+          description: "Đang chuyển hướng...",
         });
         router.push(url.pathname);
       } else {
@@ -116,28 +114,27 @@ export default function ScanPage() {
 
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6">
       <div className="flex items-center gap-4">
-        <QrCode className="h-8 w-8 text-primary" />
+        <QrCode className="h-6 w-6 text-primary" />
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Quét mã QR</h1>
-          <p className="text-muted-foreground">
-            Hướng camera vào mã QR của tài sản để tra cứu thông tin.
+          <h1 className="text-2xl font-bold tracking-tight">Quét mã QR</h1>
+          <p className="text-muted-foreground text-xs md:text-sm">
+            Hướng camera vào mã QR của tài sản để tra cứu.
           </p>
         </div>
       </div>
 
       <Card>
         <CardContent className="p-0">
-          <div className="relative aspect-video w-full bg-muted flex items-center justify-center">
+          <div className="relative aspect-square w-full bg-muted flex items-center justify-center overflow-hidden rounded-lg">
             {hasCameraPermission === false && (
                  <div className="flex flex-col items-center gap-4 text-center p-4">
-                    <VideoOff className="h-16 w-16 text-destructive"/>
+                    <VideoOff className="h-12 w-12 text-destructive"/>
                     <Alert variant="destructive">
                         <AlertTitle>Yêu cầu truy cập Camera</AlertTitle>
                         <AlertDescription>
-                            Bạn cần cấp quyền truy cập camera để sử dụng tính năng quét mã QR.
-                            Vui lòng kiểm tra cài đặt trình duyệt của bạn.
+                            Bạn cần cấp quyền truy cập camera để sử dụng tính năng này.
                         </AlertDescription>
                     </Alert>
                 </div>
@@ -148,7 +145,7 @@ export default function ScanPage() {
                     <canvas ref={canvasRef} style={{ display: 'none' }} />
                     {isScanning && (
                         <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="w-2/3 h-2/3 border-4 border-dashed border-primary rounded-lg" />
+                            <div className="w-2/3 h-2/3 border-4 border-dashed border-primary/70 rounded-lg" />
                         </div>
                     )}
                 </>

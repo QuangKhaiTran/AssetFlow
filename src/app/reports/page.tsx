@@ -65,7 +65,7 @@ export default function ReportsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6">
         <style>{`
             @media print {
                 body * {
@@ -87,10 +87,10 @@ export default function ReportsPage() {
         `}</style>
 
       <div className="flex items-center gap-4">
-        <FileText className="h-8 w-8 text-primary" />
+        <FileText className="h-6 w-6 text-primary" />
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Báo cáo</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl font-bold tracking-tight">Báo cáo</h1>
+          <p className="text-muted-foreground text-xs md:text-sm">
             Tạo và xem báo cáo tài sản theo phòng.
           </p>
         </div>
@@ -98,14 +98,14 @@ export default function ReportsPage() {
 
       <Card className="no-print">
         <CardHeader>
-          <CardTitle>Chọn một phòng</CardTitle>
+          <CardTitle>Chọn phòng</CardTitle>
           <CardDescription>
             Chọn một phòng để tạo báo cáo tài sản.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Select onValueChange={handleRoomChange}>
-            <SelectTrigger className="w-full md:w-1/3">
+            <SelectTrigger className="w-full md:w-1/2">
               <SelectValue placeholder="Chọn một phòng..." />
             </SelectTrigger>
             <SelectContent>
@@ -124,14 +124,14 @@ export default function ReportsPage() {
           <CardHeader>
              <div className="flex items-center justify-between">
                 <div>
-                    <CardTitle>Báo cáo tài sản: {selectedRoom.name}</CardTitle>
+                    <CardTitle>Báo cáo: {selectedRoom.name}</CardTitle>
                     <CardDescription>
                         Tạo ngày {new Date().toLocaleDateString()}
                     </CardDescription>
                 </div>
-                <Button onClick={handlePrint} variant="outline" className="no-print">
+                <Button onClick={handlePrint} variant="outline" size="sm" className="no-print">
                     <Printer className="mr-2 h-4 w-4" />
-                    In báo cáo
+                    In
                 </Button>
             </div>
           </CardHeader>
@@ -140,22 +140,21 @@ export default function ReportsPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Mã tài sản</TableHead>
-                  <TableHead>Tên tài sản</TableHead>
+                  <TableHead>Tên</TableHead>
                   <TableHead>Trạng thái</TableHead>
-                  <TableHead>Ngày thêm</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="h-24 text-center">
+                    <TableCell colSpan={3} className="h-24 text-center">
                       Đang tải...
                     </TableCell>
                   </TableRow>
                 ) : assets.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="h-24 text-center">
-                      Không tìm thấy tài sản nào trong phòng này.
+                    <TableCell colSpan={3} className="h-24 text-center">
+                      Không tìm thấy tài sản.
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -163,19 +162,18 @@ export default function ReportsPage() {
                     const { icon: Icon, color } = statusConfig[asset.status];
                     return (
                         <TableRow key={asset.id}>
-                            <TableCell className="font-mono">{asset.id}</TableCell>
+                            <TableCell className="font-mono text-xs">{asset.id}</TableCell>
                             <TableCell className="font-medium">{asset.name}</TableCell>
                             <TableCell>
                                 <Badge variant={
                                     asset.status === 'Đang sử dụng' ? 'default' : 
                                     asset.status === 'Đang sửa chữa' ? 'secondary' : 
                                     asset.status === 'Bị hỏng' ? 'destructive' : 'outline'
-                                } className="capitalize">
-                                    <Icon className={`mr-2 h-4 w-4 ${color}`} />
+                                } className="capitalize text-xs">
+                                    <Icon className={`mr-1 h-3 w-3 ${color}`} />
                                     {asset.status}
                                 </Badge>
                             </TableCell>
-                            <TableCell>{new Date(asset.dateAdded).toLocaleDateString()}</TableCell>
                         </TableRow>
                     );
                   })
