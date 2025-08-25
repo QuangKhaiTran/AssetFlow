@@ -98,6 +98,7 @@ export async function updateAssetStatus(formData: z.infer<typeof UpdateAssetStat
     revalidatePath('/'); // Revalidates all pages that might show asset status
     revalidatePath('/asset-management');
     revalidatePath('/reports');
+    revalidatePath('/users');
     // A more robust solution would be to get the room ID and revalidate that specific room page.
     return { message: 'Cập nhật trạng thái tài sản thành công.' };
 }
@@ -146,4 +147,29 @@ export async function addAssetType(formData: z.infer<typeof AddAssetTypeSchema>)
   
   revalidatePath('/asset-management');
   return { message: 'Đã thêm loại tài sản thành công.' };
+}
+
+// Schema for adding a user
+const AddUserSchema = z.object({
+  name: z.string().min(1, 'Tên người dùng là bắt buộc.'),
+});
+
+export async function addUser(formData: z.infer<typeof AddUserSchema>) {
+  const validatedData = AddUserSchema.safeParse(formData);
+  if (!validatedData.success) {
+    throw new Error('Dữ liệu không hợp lệ.');
+  }
+
+  try {
+    const { name } = validatedData.data;
+    const usersCol = collection(db, 'users');
+    await addDoc(usersCol, {
+      name,
+    });
+    revalidatePath('/users');
+    return { message: 'Đã thêm người dùng thành công.' };
+  } catch (error) {
+    console.error("Lỗi khi thêm người dùng:", error);
+    throw new Error('Không thể thêm người dùng.');
+  }
 }
