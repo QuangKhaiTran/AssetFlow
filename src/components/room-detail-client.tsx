@@ -77,13 +77,6 @@ export function RoomDetailClient({ room, initialAssets, manager, assetTypes }: {
     setIsGeneratingPdf(false);
   };
 
-  const getAssetUrl = (assetId: string) => {
-    if (typeof window !== 'undefined') {
-        return `${window.location.origin}/assets/${assetId}`;
-    }
-    return `/assets/${assetId}`;
-  };
-
   return (
     <div className="flex flex-col gap-4">
       <div>
@@ -173,7 +166,7 @@ export function RoomDetailClient({ room, initialAssets, manager, assetTypes }: {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10mm', pageBreakInside: 'auto' }}>
             {assets.map((asset) => (
                 <div key={asset.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '1px solid #eee', padding: '5mm', borderRadius: '4px', pageBreakInside: 'avoid' }}>
-                    <QRCodeComponent value={getAssetUrl(asset.id)} size={180} />
+                    <QRCodeComponent value={asset.id} size={180} />
                     <p style={{ marginTop: '5px', fontSize: '10px', textAlign: 'center', fontWeight: 'bold' }}>{asset.name}</p>
                     <p style={{ fontSize: '8px', textAlign: 'center', fontFamily: 'monospace' }}>{asset.id}</p>
                 </div>

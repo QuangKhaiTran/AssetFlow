@@ -20,7 +20,6 @@ export default function ScanPage() {
   useEffect(() => {
     const getCameraPermission = async () => {
       try {
-        // Change to a more generic video request to support devices without a rear camera
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
         setHasCameraPermission(true);
         if (videoRef.current) {
@@ -81,27 +80,29 @@ export default function ScanPage() {
     return () => {
       cancelAnimationFrame(animationFrameId);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isScanning]);
 
   const handleResult = (result: string) => {
-    try {
-      const url = new URL(result);
-      if (url.origin === window.location.origin && url.pathname.startsWith('/assets/')) {
+    // Check if the result is a valid asset ID (e.g., alphanumeric, 20 chars for Firestore ID)
+    // This is a simple check, can be made more robust.
+    if (result && /^[a-zA-Z0-9]{10,}$/.test(result)) {
         toast({
-          title: "Quét thành công!",
-          description: "Đang chuyển hướng...",
+            title: "Quét thành công!",
+            description: "Đang chuyển hướng...",
         });
-        router.push(url.pathname);
-      } else {
-        throw new Error("Mã QR không hợp lệ.");
-      }
-    } catch (error) {
+        router.push(`/assets/${result}`);
+    } else {
        toast({
         variant: "destructive",
         title: "Mã QR không hợp lệ",
-        description: `Nội dung mã: ${result}`,
+        description: `Nội dung không phải là ID tài sản hợp lệ.`,
       });
-      setTimeout(() => setIsScanning(true), 2000);
+      // Resume scanning after a short delay
+      setTimeout(() => {
+        setScanResult(null);
+        setIsScanning(true);
+      }, 2000);
     }
   };
 

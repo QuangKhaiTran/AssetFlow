@@ -36,9 +36,6 @@ export default async function AssetDetailPage({ params }: { params: { id: string
   const { icon: Icon, color } = statusConfig[asset.status];
   const allRooms = await getRooms();
 
-  // This should be replaced with the actual URL in a production environment
-  const assetUrl = `http://localhost:9002/assets/${asset.id}`;
-
   return (
     <div className="flex flex-col gap-4">
        <div>
@@ -118,7 +115,7 @@ export default async function AssetDetailPage({ params }: { params: { id: string
                 </CardHeader>
                 <CardContent className="flex items-center justify-center p-2">
                     <div className="p-1.5 bg-white rounded-md border">
-                        <QRCodeComponent value={assetUrl} size={150} />
+                        <QRCodeComponent value={asset.id} size={150} />
                     </div>
                 </CardContent>
             </Card>
