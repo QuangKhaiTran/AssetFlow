@@ -1,4 +1,4 @@
-import { getAssetById, getRoomById, getUserById } from '@/lib/data';
+import { getAssetById, getRoomById, getUserById, getRooms } from '@/lib/data';
 import { notFound } from 'next/navigation';
 import {
   Card,
@@ -14,6 +14,8 @@ import Link from 'next/link';
 import { QRCodeComponent } from '@/components/qr-code';
 import { type AssetStatus } from '@/lib/types';
 import { CheckCircle, Wrench, XCircle, Trash2 } from 'lucide-react';
+import { UpdateStatusDialog } from '@/components/update-status-dialog';
+import { MoveAssetDialog } from '@/components/move-asset-dialog';
 
 const statusConfig: Record<AssetStatus, { icon: React.ElementType, color: string }> = {
     'Đang sử dụng': { icon: CheckCircle, color: 'text-green-600' },
@@ -32,6 +34,7 @@ export default async function AssetDetailPage({ params }: { params: { id: string
   const room = await getRoomById(asset.roomId);
   const manager = room ? await getUserById(room.managerId) : null;
   const { icon: Icon, color } = statusConfig[asset.status];
+  const allRooms = await getRooms();
 
   // This should be replaced with the actual URL in a production environment
   const assetUrl = `http://localhost:9002/assets/${asset.id}`;
@@ -88,14 +91,18 @@ export default async function AssetDetailPage({ params }: { params: { id: string
                         </Badge>
                     </div>
                     <div className="flex gap-2 pt-4">
-                        <Button>
-                            <Move className="mr-2 h-4 w-4" />
-                            Di dời tài sản
-                        </Button>
-                        <Button variant="outline">
-                            <Edit className="mr-2 h-4 w-4" />
-                            Cập nhật trạng thái
-                        </Button>
+                        <MoveAssetDialog asset={asset} rooms={allRooms}>
+                            <Button>
+                                <Move className="mr-2 h-4 w-4" />
+                                Di dời tài sản
+                            </Button>
+                        </MoveAssetDialog>
+                        <UpdateStatusDialog asset={asset}>
+                            <Button variant="outline">
+                                <Edit className="mr-2 h-4 w-4" />
+                                Cập nhật trạng thái
+                            </Button>
+                        </UpdateStatusDialog>
                     </div>
                 </CardContent>
             </Card>

@@ -1,19 +1,19 @@
 import { type Asset, type Room, type User } from "./types";
 
-const users: User[] = [
+export const users: User[] = [
   { id: "user-1", name: "Nguyễn Văn A" },
   { id: "user-2", name: "Trần Thị B" },
   { id: "user-3", name: "Lê Văn C" },
 ];
 
-const rooms: Room[] = [
+export const rooms: Room[] = [
   { id: "room-1", name: "Phòng họp A", managerId: "user-1" },
   { id: "room-2", name: "Văn phòng B", managerId: "user-2" },
   { id: "room-3", name: "Phòng thí nghiệm C", managerId: "user-3" },
   { id: "room-4", name: "Sảnh chính", managerId: "user-1" },
 ];
 
-const assets: Asset[] = [
+export const assets: Asset[] = [
   { id: "asset-1", name: "Bàn họp", roomId: "room-1", status: "Đang sử dụng", dateAdded: "2023-01-15" },
   { id: "asset-2", name: "Ghế xoay", roomId: "room-2", status: "Đang sử dụng", dateAdded: "2023-02-20" },
   { id: "asset-3", name: "Máy in Laser", roomId: "room-2", status: "Đang sửa chữa", dateAdded: "2023-03-10" },

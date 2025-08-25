@@ -18,6 +18,7 @@ import { getRooms, getAssets, getUsers } from "@/lib/data";
 import { Building, Users, Box, CheckCircle, Wrench, XCircle, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { type Asset } from "@/lib/types";
+import { AddRoomDialog } from "@/components/add-room-dialog";
 
 const statusIcons: { [key: Asset['status']]: React.ReactNode } = {
   "Đang sử dụng": <CheckCircle className="text-green-500" />,
@@ -90,7 +91,9 @@ export default async function DashboardPage() {
       <section>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-bold tracking-tight">Phòng</h2>
-          <Button>Tạo phòng mới</Button>
+           <AddRoomDialog users={users}>
+            <Button>Tạo phòng mới</Button>
+          </AddRoomDialog>
         </div>
         <Card>
           <Table>

@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, User, Calendar, PlusCircle, CheckCircle, Wrench, XCircle, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { type AssetStatus } from '@/lib/types';
+import { AddAssetDialog } from '@/components/add-asset-dialog';
 
 const statusConfig: Record<AssetStatus, { icon: React.ElementType, color: string }> = {
     'Đang sử dụng': { icon: CheckCircle, color: 'text-green-600' },
@@ -62,10 +63,12 @@ export default async function RoomDetailPage({ params }: { params: { id: string 
                 <CardTitle>Tài sản trong {room.name}</CardTitle>
                 <CardDescription>Danh sách tất cả tài sản vật lý trong phòng này.</CardDescription>
             </div>
-            <Button>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Thêm tài sản
-            </Button>
+            <AddAssetDialog roomId={room.id}>
+              <Button>
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Thêm tài sản
+              </Button>
+            </AddAssetDialog>
           </div>
         </CardHeader>
         <CardContent>
