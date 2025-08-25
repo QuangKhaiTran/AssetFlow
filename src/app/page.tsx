@@ -15,13 +15,13 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getRooms, getAssets, getUsers } from "@/lib/data";
-import { Building, Users, Box, CheckCircle, Tool, XCircle, Trash2 } from "lucide-react";
+import { Building, Users, Box, CheckCircle, Wrench, XCircle, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { type Asset } from "@/lib/types";
 
 const statusIcons: { [key: Asset['status']]: React.ReactNode } = {
   "In Use": <CheckCircle className="text-green-500" />,
-  "Under Repair": <Tool className="text-yellow-500" />,
+  "Under Repair": <Wrench className="text-yellow-500" />,
   "Broken": <XCircle className="text-red-500" />,
   "Disposed": <Trash2 className="text-gray-500" />,
 };
@@ -78,7 +78,7 @@ export default async function DashboardPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Assets Under Repair</CardTitle>
-              <Tool className="h-4 w-4 text-muted-foreground" />
+              <Wrench className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{getAssetsByStatus('Under Repair')}</div>

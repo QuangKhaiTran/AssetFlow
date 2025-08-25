@@ -13,11 +13,11 @@ import { ArrowLeft, MapPin, User, Calendar, Tag, QrCode, Move, Edit } from 'luci
 import Link from 'next/link';
 import { QRCodeComponent } from '@/components/qr-code';
 import { type AssetStatus } from '@/lib/types';
-import { CheckCircle, Tool, XCircle, Trash2 } from 'lucide-react';
+import { CheckCircle, Wrench, XCircle, Trash2 } from 'lucide-react';
 
 const statusConfig: Record<AssetStatus, { icon: React.ElementType, color: string }> = {
     'In Use': { icon: CheckCircle, color: 'text-green-600' },
-    'Under Repair': { icon: Tool, color: 'text-amber-600' },
+    'Under Repair': { icon: Wrench, color: 'text-amber-600' },
     'Broken': { icon: XCircle, color: 'text-red-600' },
     'Disposed': { icon: Trash2, color: 'text-gray-500' },
 };

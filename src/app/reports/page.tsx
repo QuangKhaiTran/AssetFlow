@@ -26,12 +26,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { FileText, Printer, CheckCircle, Tool, XCircle, Trash2 } from 'lucide-react';
+import { FileText, Printer, CheckCircle, Wrench, XCircle, Trash2 } from 'lucide-react';
 import type { AssetStatus } from '@/lib/types';
 
 const statusConfig: Record<AssetStatus, { icon: React.ElementType, color: string }> = {
   'In Use': { icon: CheckCircle, color: 'text-green-600' },
-  'Under Repair': { icon: Tool, color: 'text-amber-600' },
+  'Under Repair': { icon: Wrench, color: 'text-amber-600' },
   'Broken': { icon: XCircle, color: 'text-red-600' },
   'Disposed': { icon: Trash2, color: 'text-gray-500' },
 };

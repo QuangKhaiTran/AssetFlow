@@ -17,13 +17,13 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, User, Calendar, PlusCircle, CheckCircle, Tool, XCircle, Trash2 } from 'lucide-react';
+import { ArrowLeft, User, Calendar, PlusCircle, CheckCircle, Wrench, XCircle, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { type AssetStatus } from '@/lib/types';
 
 const statusConfig: Record<AssetStatus, { icon: React.ElementType, color: string }> = {
     'In Use': { icon: CheckCircle, color: 'text-green-600' },
-    'Under Repair': { icon: Tool, color: 'text-amber-600' },
+    'Under Repair': { icon: Wrench, color: 'text-amber-600' },
     'Broken': { icon: XCircle, color: 'text-red-600' },
     'Disposed': { icon: Trash2, color: 'text-gray-500' },
 };
