@@ -30,9 +30,9 @@ export function LayoutProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-      <div className="flex flex-col flex-1">
+      <div className="flex flex-col flex-1 h-screen">
         <Header />
-        <main className="flex-1 p-3 md:p-6 bg-background/95">
+        <main className="flex-1 p-3 md:p-6 bg-background/95 overflow-y-auto no-scrollbar">
           {children}
         </main>
         <BottomNavigation />
