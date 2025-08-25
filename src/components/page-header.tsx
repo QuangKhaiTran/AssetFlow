@@ -9,6 +9,7 @@ import {
     QrCode,
     Users,
     Bot,
+    Building
 } from "lucide-react";
 
 const pageConfig: Record<string, { title: string; description: string; icon: React.ElementType }> = {
@@ -44,13 +45,34 @@ const pageConfig: Record<string, { title: string; description: string; icon: Rea
   },
 };
 
+const dynamicPageConfig: Record<string, { title: string; description: string; icon: React.ElementType }> = {
+    "rooms": {
+        title: "Chi tiết phòng",
+        description: "Thông tin chi tiết về phòng và các tài sản bên trong.",
+        icon: Building,
+    },
+    "assets": {
+        title: "Chi tiết tài sản",
+        description: "Thông tin chi tiết, trạng thái và lịch sử của tài sản.",
+        icon: FileText, // Or another relevant icon
+    }
+}
+
+
 export function PageHeader() {
   const pathname = usePathname();
+  
+  const pathSegments = pathname.split('/').filter(Boolean);
 
-  // Find the matching configuration, handle dynamic routes later
-  const config = Object.keys(pageConfig).find(key => pathname.startsWith(key) && (key === '/' ? pathname.length === 1 : true) ) ? pageConfig[Object.keys(pageConfig).find(key => pathname.startsWith(key) && (key === '/' ? pathname.length === 1 : true))!] : null;
+  let config = pageConfig[pathname];
 
-  // Don't render anything for dynamic routes for now, or routes not in config
+  if (!config && pathSegments.length > 1) {
+    const pageType = pathSegments[0];
+    if (dynamicPageConfig[pageType]) {
+        config = dynamicPageConfig[pageType]
+    }
+  }
+  
   if (!config) {
     return null;
   }

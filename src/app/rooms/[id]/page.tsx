@@ -1,5 +1,4 @@
 
-"use client";
 
 import { getRoomById, getAssetsByRoomId, getUserById, getAssetTypes } from '@/lib/data';
 import { notFound } from 'next/navigation';
@@ -36,7 +35,9 @@ const statusConfig: Record<AssetStatus, { icon: React.ElementType, color: string
     'Đã thanh lý': { icon: Trash2, color: 'text-gray-500' },
 };
 
-function RoomDetailPageContent({ room, initialAssets, manager, assetTypes }: { room: Room, initialAssets: Asset[], manager: UserType | null, assetTypes: AssetType[] }) {
+function RoomDetailPageClient({ room, initialAssets, manager, assetTypes }: { room: Room, initialAssets: Asset[], manager: UserType | null, assetTypes: AssetType[] }) {
+  "use client";
+  
   const [assets, setAssets] = useState(initialAssets);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
@@ -48,11 +49,6 @@ function RoomDetailPageContent({ room, initialAssets, manager, assetTypes }: { r
   const handleGeneratePdf = async () => {
     setIsGeneratingPdf(true);
     const pdf = new jsPDF('p', 'mm', 'a4');
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
-    const margin = 10;
-    const cellWidth = (pdfWidth - margin * 2) / 3;
-    const cellHeight = cellWidth; // Make it square-ish
     const qrCodeElements = document.getElementById('qr-code-grid-for-pdf');
 
     if (qrCodeElements) {
@@ -86,6 +82,7 @@ function RoomDetailPageContent({ room, initialAssets, manager, assetTypes }: { r
   };
 
   const getAssetUrl = (assetId: string) => {
+    // In a real app, this should come from environment variables
     return `http://localhost:9002/assets/${assetId}`;
   };
 
@@ -98,13 +95,6 @@ function RoomDetailPageContent({ room, initialAssets, manager, assetTypes }: { r
             Quay lại Tổng quan
           </Link>
         </Button>
-        <h1 className="text-xl font-bold tracking-tight">{room.name}</h1>
-        <div className="flex items-center gap-2 text-muted-foreground mt-1.5 text-[10px]">
-            <div className='flex items-center gap-1.5'>
-                <User className="h-3.5 w-3.5" />
-                <span>Người quản lý: {manager?.name || 'N/A'}</span>
-            </div>
-        </div>
       </div>
 
       <Card>
@@ -208,5 +198,5 @@ export default async function RoomDetailPage({ params }: { params: { id: string 
   const manager = await getUserById(room.managerId);
   const assetTypes = await getAssetTypes();
 
-  return <RoomDetailPageContent room={room} initialAssets={assets} manager={manager || null} assetTypes={assetTypes} />;
+  return <RoomDetailPageClient room={room} initialAssets={assets} manager={manager || null} assetTypes={assetTypes} />;
 }
