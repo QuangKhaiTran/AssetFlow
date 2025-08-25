@@ -65,7 +65,7 @@ export default function ReportsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
         <style>{`
             @media print {
                 body * {
@@ -86,11 +86,11 @@ export default function ReportsPage() {
             }
         `}</style>
 
-      <div className="flex items-center gap-4">
-        <FileText className="h-6 w-6 text-primary" />
+      <div className="flex items-center gap-2">
+        <FileText className="h-5 w-5 text-primary" />
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Báo cáo</h1>
-          <p className="text-muted-foreground text-xs md:text-sm">
+          <h1 className="text-xl font-bold tracking-tight">Báo cáo</h1>
+          <p className="text-muted-foreground text-xs">
             Tạo và xem báo cáo tài sản theo phòng.
           </p>
         </div>
@@ -130,7 +130,7 @@ export default function ReportsPage() {
                     </CardDescription>
                 </div>
                 <Button onClick={handlePrint} variant="outline" size="sm" className="no-print">
-                    <Printer className="mr-2 h-4 w-4" />
+                    <Printer className="mr-1.5 h-3.5 w-3.5" />
                     In
                 </Button>
             </div>
@@ -162,14 +162,14 @@ export default function ReportsPage() {
                     const { icon: Icon, color } = statusConfig[asset.status];
                     return (
                         <TableRow key={asset.id}>
-                            <TableCell className="font-mono text-xs">{asset.id}</TableCell>
+                            <TableCell className="font-mono text-[10px]">{asset.id}</TableCell>
                             <TableCell className="font-medium">{asset.name}</TableCell>
                             <TableCell>
                                 <Badge variant={
                                     asset.status === 'Đang sử dụng' ? 'default' : 
                                     asset.status === 'Đang sửa chữa' ? 'secondary' : 
                                     asset.status === 'Bị hỏng' ? 'destructive' : 'outline'
-                                } className="capitalize text-xs">
+                                } className="capitalize text-[10px]">
                                     <Icon className={`mr-1 h-3 w-3 ${color}`} />
                                     {asset.status}
                                 </Badge>

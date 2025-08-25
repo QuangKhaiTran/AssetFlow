@@ -40,18 +40,18 @@ export default async function RoomDetailPage({ params }: { params: { id: string 
   const assetTypes = await getAssetTypes();
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       <div>
-        <Button asChild variant="ghost" className="mb-2 -ml-4">
+        <Button asChild variant="ghost" className="mb-1 -ml-3 h-8">
           <Link href="/">
-            <ArrowLeft className="mr-2 h-4 w-4" />
+            <ArrowLeft className="mr-1.5 h-3.5 w-3.5" />
             Quay lại Tổng quan
           </Link>
         </Button>
-        <h1 className="text-2xl font-bold tracking-tight">{room.name}</h1>
-        <div className="flex items-center gap-4 text-muted-foreground mt-2 text-xs">
-            <div className='flex items-center gap-2'>
-                <User className="h-4 w-4" />
+        <h1 className="text-xl font-bold tracking-tight">{room.name}</h1>
+        <div className="flex items-center gap-2 text-muted-foreground mt-1.5 text-[10px]">
+            <div className='flex items-center gap-1.5'>
+                <User className="h-3.5 w-3.5" />
                 <span>Người quản lý: {manager?.name || 'N/A'}</span>
             </div>
         </div>
@@ -66,7 +66,7 @@ export default async function RoomDetailPage({ params }: { params: { id: string 
             </div>
             <AddAssetDialog roomId={room.id} assetTypes={assetTypes}>
               <Button size="sm">
-                  <PlusCircle className="mr-2 h-4 w-4" />
+                  <PlusCircle className="mr-1.5 h-3.5 w-3.5" />
                   Thêm
               </Button>
             </AddAssetDialog>
@@ -79,7 +79,7 @@ export default async function RoomDetailPage({ params }: { params: { id: string 
                 <TableHead>Tên tài sản</TableHead>
                 <TableHead>Trạng thái</TableHead>
                 <TableHead>Ngày thêm</TableHead>
-                <TableHead className="w-[80px]"></TableHead>
+                <TableHead className="w-[70px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -98,14 +98,14 @@ export default async function RoomDetailPage({ params }: { params: { id: string 
                                 asset.status === 'Đang sử dụng' ? 'default' : 
                                 asset.status === 'Đang sửa chữa' ? 'secondary' : 
                                 asset.status === 'Bị hỏng' ? 'destructive' : 'outline'
-                            } className="capitalize text-xs">
+                            } className="capitalize text-[10px]">
                                 <Icon className={`mr-1 h-3 w-3 ${color}`} />
                                 {asset.status}
                             </Badge>
                             </TableCell>
-                            <TableCell className="text-muted-foreground">
-                                <div className='flex items-center gap-2'>
-                                    <Calendar className="h-4 w-4" />
+                            <TableCell className="text-muted-foreground text-xs">
+                                <div className='flex items-center gap-1.5'>
+                                    <Calendar className="h-3.5 w-3.5" />
                                     <span>{new Date(asset.dateAdded).toLocaleDateString()}</span>
                                 </div>
                             </TableCell>

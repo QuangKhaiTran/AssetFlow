@@ -38,52 +38,52 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       <section>
-        <h1 className="text-2xl font-bold tracking-tight mb-4">Tổng quan</h1>
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+        <h1 className="text-xl font-bold tracking-tight mb-3">Tổng quan</h1>
+        <div className="grid grid-cols-2 gap-3">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Tổng số phòng</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5">
+              <CardTitle className="text-xs font-medium">Tổng số phòng</CardTitle>
               <Building className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-xl md:text-2xl font-bold">{rooms.length}</div>
+              <div className="text-lg md:text-xl font-bold">{rooms.length}</div>
             </CardContent>
           </Card>
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Tổng số tài sản</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5">
+              <CardTitle className="text-xs font-medium">Tổng số tài sản</CardTitle>
               <Box className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-xl md:text-2xl font-bold">{assets.length}</div>
+              <div className="text-lg md:text-xl font-bold">{assets.length}</div>
             </CardContent>
           </Card>
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Người quản lý</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5">
+              <CardTitle className="text-xs font-medium">Người quản lý</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-xl md:text-2xl font-bold">{users.length}</div>
+              <div className="text-lg md:text-xl font-bold">{users.length}</div>
             </CardContent>
           </Card>
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Tài sản đang sửa chữa</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5">
+              <CardTitle className="text-xs font-medium">Đang sửa chữa</CardTitle>
               <Wrench className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-xl md:text-2xl font-bold">{getAssetsByStatus('Đang sửa chữa')}</div>
+              <div className="text-lg md:text-xl font-bold">{getAssetsByStatus('Đang sửa chữa')}</div>
             </CardContent>
           </Card>
         </div>
       </section>
 
       <section>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold tracking-tight">Phòng</h2>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-bold tracking-tight">Phòng</h2>
            <AddRoomDialog users={users}>
             <Button size="sm">Tạo phòng mới</Button>
           </AddRoomDialog>
@@ -95,7 +95,7 @@ export default async function DashboardPage() {
                 <TableHead>Tên phòng</TableHead>
                 <TableHead>Người quản lý</TableHead>
                 <TableHead className="text-right">Tài sản</TableHead>
-                <TableHead className="w-[80px]"></TableHead>
+                <TableHead className="w-[60px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
