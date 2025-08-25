@@ -91,10 +91,10 @@ export default async function DashboardPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-[10px]">Tên phòng</TableHead>
-                <TableHead className="text-[10px]">Người quản lý</TableHead>
-                <TableHead className="text-right text-[10px]">Tài sản</TableHead>
-                <TableHead className="w-[60px]"></TableHead>
+                <TableHead className="w-2/5 text-[10px]">Tên phòng</TableHead>
+                <TableHead className="w-2/5 text-[10px]">Người quản lý</TableHead>
+                <TableHead className="w-1/5 text-center text-[10px]">Tài sản</TableHead>
+                <TableHead className="w-[80px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -102,8 +102,8 @@ export default async function DashboardPage() {
                 <TableRow key={room.id}>
                   <TableCell className="font-medium text-[11px]">{room.name}</TableCell>
                   <TableCell className="text-[11px]">{getManagerName(room.managerId)}</TableCell>
-                  <TableCell className="text-right">
-                    <Badge variant="secondary">
+                  <TableCell className="text-center">
+                    <Badge variant="secondary" className="px-2">
                       {getAssetCountForRoom(room.id)}
                     </Badge>
                   </TableCell>
