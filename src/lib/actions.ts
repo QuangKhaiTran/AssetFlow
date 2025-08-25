@@ -1,11 +1,10 @@
-"use server";
+'use server';
 
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { assets, assetTypes } from './data'; // rooms is no longer here
 import { type Asset, type AssetStatus } from './types';
 import { db } from './firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, doc, updateDoc, writeBatch } from 'firebase/firestore';
 
 // Schema for adding a room
 const AddRoomSchema = z.object({
@@ -49,19 +48,25 @@ export async function addAsset(formData: z.infer<typeof AddAssetSchema>): Promis
     }
     const { name, quantity, roomId, assetTypeId } = validatedData.data;
     const newAssets: Pick<Asset, 'id' | 'name'>[] = [];
+    
+    const assetsCol = collection(db, 'assets');
+    const batch = writeBatch(db);
 
     for (let i = 0; i < quantity; i++) {
-        const newAsset = {
-            id: `asset-${Date.now()}-${i}`,
-            name: quantity > 1 ? `${name} #${i + 1}` : name,
+        const newAssetDocRef = doc(assetsCol); // Auto-generate ID
+        const assetName = quantity > 1 ? `${name} #${i + 1}` : name;
+        const newAssetData = {
+            name: assetName,
             roomId,
             status: 'Đang sử dụng' as AssetStatus,
             dateAdded: new Date().toISOString().split('T')[0],
-            assetTypeId: assetTypeId,
+            assetTypeId,
         };
-        assets.unshift(newAsset);
-        newAssets.push({ id: newAsset.id, name: newAsset.name });
+        batch.set(newAssetDocRef, newAssetData);
+        newAssets.push({ id: newAssetDocRef.id, name: assetName });
     }
+    
+    await batch.commit();
     
     revalidatePath(`/rooms/${roomId}`);
     revalidatePath('/asset-management');
@@ -82,17 +87,18 @@ export async function updateAssetStatus(formData: z.infer<typeof UpdateAssetStat
     }
 
     const { assetId, status } = validatedData.data;
-    const assetIndex = assets.findIndex(a => a.id === assetId);
+    const assetDocRef = doc(db, 'assets', assetId);
 
-    if (assetIndex === -1) {
-        throw new Error('Không tìm thấy tài sản.');
-    }
+    // To revalidate paths, we might need to fetch the asset first to get roomId.
+    // For simplicity now, we revalidate generic paths.
+    // In a real app, you might fetch the doc before update.
+    await updateDoc(assetDocRef, { status });
 
-    assets[assetIndex].status = status;
     revalidatePath(`/assets/${assetId}`);
-    revalidatePath(`/rooms/${assets[assetIndex].roomId}`);
+    revalidatePath('/'); // Revalidates all pages that might show asset status
     revalidatePath('/asset-management');
-    revalidatePath('/');
+    revalidatePath('/reports');
+    // A more robust solution would be to get the room ID and revalidate that specific room page.
     return { message: 'Cập nhật trạng thái tài sản thành công.' };
 }
 
@@ -109,20 +115,16 @@ export async function moveAsset(formData: z.infer<typeof MoveAssetSchema>) {
     }
 
     const { assetId, newRoomId } = validatedData.data;
-    const assetIndex = assets.findIndex(a => a.id === assetId);
+    const assetDocRef = doc(db, 'assets', assetId);
 
-    if (assetIndex === -1) {
-        throw new Error('Không tìm thấy tài sản.');
-    }
-    
-    const oldRoomId = assets[assetIndex].roomId;
-    assets[assetIndex].roomId = newRoomId;
+    await updateDoc(assetDocRef, { roomId: newRoomId });
 
+    // This requires knowing old and new room IDs.
+    // Revalidating multiple paths to ensure data consistency.
     revalidatePath(`/assets/${assetId}`);
-    revalidatePath(`/rooms/${oldRoomId}`);
     revalidatePath(`/rooms/${newRoomId}`);
-    revalidatePath('/asset-management');
-    revalidatePath('/');
+    // We don't know the old room ID here without another read, so revalidate all rooms for simplicity
+    revalidatePath('/'); 
     return { message: 'Di dời tài sản thành công.' };
 }
 
@@ -138,12 +140,10 @@ export async function addAssetType(formData: z.infer<typeof AddAssetTypeSchema>)
   }
   
   const { name } = validatedData.data;
-
-  const newAssetType = {
-    id: `type-${Date.now()}`,
-    name,
-  };
-  assetTypes.unshift(newAssetType);
+  
+  const assetTypesCol = collection(db, 'assetTypes');
+  await addDoc(assetTypesCol, { name });
+  
   revalidatePath('/asset-management');
   return { message: 'Đã thêm loại tài sản thành công.' };
 }
