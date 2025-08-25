@@ -1,17 +1,8 @@
 import { type Asset, type Room, type User, type AssetType } from "./types";
+import { db } from './firebase';
+import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
 
-export const users: User[] = [
-  { id: "user-1", name: "Nguyễn Văn A" },
-  { id: "user-2", name: "Trần Thị B" },
-  { id: "user-3", name: "Lê Văn C" },
-];
-
-export const rooms: Room[] = [
-  { id: "room-1", name: "Phòng họp A", managerId: "user-1" },
-  { id: "room-2", name: "Văn phòng B", managerId: "user-2" },
-  { id: "room-3", name: "Phòng thí nghiệm C", managerId: "user-3" },
-  { id: "room-4", name: "Sảnh chính", managerId: "user-1" },
-];
+// --- Dữ liệu giả lập (sẽ được thay thế dần) ---
 
 export const assetTypes: AssetType[] = [
     { id: 'type-1', name: 'Bàn họp' },
@@ -37,6 +28,63 @@ export const assets: Asset[] = [
   { id: "asset-9", name: "Tủ đựng hóa chất", roomId: "room-3", status: "Đang sử dụng", dateAdded: "2023-06-12", assetTypeId: "type-9" },
 ];
 
+// --- Các hàm tương tác với Firestore ---
+
+export async function getUsers(): Promise<User[]> {
+  try {
+    const usersCol = collection(db, 'users');
+    const userSnapshot = await getDocs(usersCol);
+    const userList = userSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as User));
+    return userList;
+  } catch (error) {
+    console.error("Lỗi khi lấy danh sách người dùng:", error);
+    return [];
+  }
+}
+
+export async function getUserById(id: string): Promise<User | undefined> {
+    try {
+        const userDocRef = doc(db, 'users', id);
+        const userSnap = await getDoc(userDocRef);
+        if (userSnap.exists()) {
+            return { id: userSnap.id, ...userSnap.data() } as User;
+        }
+        return undefined;
+    } catch (error) {
+        console.error("Lỗi khi lấy thông tin người dùng:", error);
+        return undefined;
+    }
+}
+
+export async function getRooms(): Promise<Room[]> {
+  try {
+    const roomsCol = collection(db, 'rooms');
+    const roomSnapshot = await getDocs(roomsCol);
+    const roomList = roomSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Room));
+    return roomList;
+  } catch (error) {
+    console.error("Lỗi khi lấy danh sách phòng:", error);
+    return [];
+  }
+}
+
+export async function getRoomById(id: string): Promise<Room | undefined> {
+  try {
+    const roomDocRef = doc(db, 'rooms', id);
+    const roomSnap = await getDoc(roomDocRef);
+    if (roomSnap.exists()) {
+        return { id: roomSnap.id, ...roomSnap.data() } as Room;
+    }
+    return undefined;
+  } catch(error) {
+      console.error("Lỗi khi lấy thông tin phòng:", error);
+      return undefined;
+  }
+}
+
+
+// --- Các hàm vẫn dùng dữ liệu giả lập ---
+
 export async function getAssets(): Promise<Asset[]> {
   return Promise.resolve(assets);
 }
@@ -47,22 +95,6 @@ export async function getAssetById(id: string): Promise<Asset | undefined> {
 
 export async function getAssetsByRoomId(roomId: string): Promise<Asset[]> {
   return Promise.resolve(assets.filter(asset => asset.roomId === roomId));
-}
-
-export async function getRooms(): Promise<Room[]> {
-  return Promise.resolve(rooms);
-}
-
-export async function getRoomById(id: string): Promise<Room | undefined> {
-  return Promise.resolve(rooms.find(room => room.id === id));
-}
-
-export async function getUsers(): Promise<User[]> {
-  return Promise.resolve(users);
-}
-
-export async function getUserById(id: string): Promise<User | undefined> {
-    return Promise.resolve(users.find(user => user.id === id));
 }
 
 export async function getAssetTypes(): Promise<AssetType[]> {

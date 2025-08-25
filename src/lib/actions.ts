@@ -2,8 +2,10 @@
 
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { assets, rooms, assetTypes } from './data';
+import { assets, assetTypes } from './data'; // rooms is no longer here
 import { type Asset, type AssetStatus } from './types';
+import { db } from './firebase';
+import { collection, addDoc } from 'firebase/firestore';
 
 // Schema for adding a room
 const AddRoomSchema = z.object({
@@ -17,15 +19,19 @@ export async function addRoom(formData: z.infer<typeof AddRoomSchema>) {
     throw new Error('Dữ liệu không hợp lệ.');
   }
 
-  const { name, managerId } = validatedData.data;
-  const newRoom = {
-    id: `room-${Date.now()}`,
-    name,
-    managerId,
-  };
-  rooms.unshift(newRoom); // Add to the beginning of the array
-  revalidatePath('/');
-  return { message: 'Đã thêm phòng thành công.' };
+  try {
+    const { name, managerId } = validatedData.data;
+    const roomsCol = collection(db, 'rooms');
+    await addDoc(roomsCol, {
+      name,
+      managerId,
+    });
+    revalidatePath('/');
+    return { message: 'Đã thêm phòng thành công.' };
+  } catch (error) {
+    console.error("Lỗi khi thêm phòng:", error);
+    throw new Error('Không thể thêm phòng.');
+  }
 }
 
 // Schema for adding an asset
