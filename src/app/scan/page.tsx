@@ -115,16 +115,6 @@ export default function ScanPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-2">
-        <QrCode className="h-5 w-5 text-primary" />
-        <div>
-          <h1 className="text-xl font-bold tracking-tight">Quét mã QR</h1>
-          <p className="text-muted-foreground text-xs">
-            Hướng camera vào mã QR của tài sản để tra cứu.
-          </p>
-        </div>
-      </div>
-
       <Card>
         <CardContent className="p-0">
           <div className="relative aspect-square w-full bg-muted flex items-center justify-center overflow-hidden rounded-lg">

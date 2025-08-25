@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ClipboardList, PlusCircle } from "lucide-react";
+import { PlusCircle } from "lucide-react";
 import { AddAssetTypeDialog } from "@/components/add-asset-type-dialog";
 
 export default async function AssetManagementPage() {
@@ -30,16 +30,6 @@ export default async function AssetManagementPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-2">
-        <ClipboardList className="h-5 w-5 text-primary" />
-        <div>
-          <h1 className="text-xl font-bold tracking-tight">Quản lý loại tài sản</h1>
-          <p className="text-muted-foreground text-xs">
-            Tạo và xem các loại tài sản trong hệ thống.
-          </p>
-        </div>
-      </div>
-
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">

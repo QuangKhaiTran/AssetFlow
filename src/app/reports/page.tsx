@@ -86,16 +86,6 @@ export default function ReportsPage() {
             }
         `}</style>
 
-      <div className="flex items-center gap-2">
-        <FileText className="h-5 w-5 text-primary" />
-        <div>
-          <h1 className="text-xl font-bold tracking-tight">Báo cáo</h1>
-          <p className="text-muted-foreground text-xs">
-            Tạo và xem báo cáo tài sản theo phòng.
-          </p>
-        </div>
-      </div>
-
       <Card className="no-print">
         <CardHeader>
           <CardTitle>Chọn phòng</CardTitle>

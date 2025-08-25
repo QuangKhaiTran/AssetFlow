@@ -40,7 +40,6 @@ export default async function DashboardPage() {
   return (
     <div className="flex flex-col gap-4">
       <section>
-        <h1 className="text-xl font-bold tracking-tight mb-3">Tổng quan</h1>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5">

@@ -71,16 +71,6 @@ export default function PredictiveMaintenancePage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex items-center gap-4">
-        <Bot className="h-8 w-8 text-primary" />
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Bảo trì dự đoán bằng AI</h1>
-          <p className="text-muted-foreground">
-            Tận dụng AI để dự báo nhu cầu bảo trì và ngăn ngừa thời gian chết.
-          </p>
-        </div>
-      </div>
-
       <div className="grid md:grid-cols-2 gap-8">
         <Card>
           <Form {...form}>

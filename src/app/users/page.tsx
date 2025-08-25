@@ -16,7 +16,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Users, PlusCircle } from "lucide-react";
+import { PlusCircle } from "lucide-react";
 import { AddUserDialog } from "@/components/add-user-dialog";
 
 export default async function UsersPage() {
@@ -24,16 +24,6 @@ export default async function UsersPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-2">
-        <Users className="h-5 w-5 text-primary" />
-        <div>
-          <h1 className="text-xl font-bold tracking-tight">Quản lý người dùng</h1>
-          <p className="text-muted-foreground text-xs">
-            Tạo và xem danh sách người dùng trong hệ thống.
-          </p>
-        </div>
-      </div>
-
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">

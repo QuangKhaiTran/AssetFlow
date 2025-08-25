@@ -15,6 +15,7 @@ import { useAuth } from "./auth-provider";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
+import { PageHeader } from "./page-header";
 
 export function Header() {
   const { user } = useAuth();
@@ -33,7 +34,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-10 flex h-12 items-center gap-4 border-b bg-card px-4 sm:px-6">
       <div className="flex-1">
-        {/* Can add breadcrumbs or page title here */}
+        <PageHeader />
       </div>
       <div className="flex items-center gap-2">
         <Button variant="ghost" size="icon" className="h-8 w-8">
