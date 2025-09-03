@@ -22,7 +22,7 @@ export default async function DashboardPage() {
   return (
     <div className="flex flex-col gap-4">
       <section>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-3">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5">
               <CardTitle className="text-xs font-medium">Tổng số phòng</CardTitle>
