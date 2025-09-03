@@ -138,7 +138,6 @@ async function handlePost(
 async function handlePut(pathSegments: string[], body: unknown, res: any) {
   const resource = pathSegments[0];
   const idOrAction = pathSegments[1];
-  const actionId = pathSegments[2];
 
   switch (resource) {
   case "rooms":
@@ -368,5 +367,3 @@ async function moveAsset(data: unknown, res: any) {
     }
   }
 }
-
-    
