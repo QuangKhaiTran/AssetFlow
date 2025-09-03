@@ -94,15 +94,10 @@ export const api = onRequest(
       case "assets":
         if (method === "POST" && pathSegments.length === 1) {
             await addAsset(body, res);
-        } else if (method === "PUT" && pathSegments.length === 2) {
-            const action = pathSegments[1];
-            if (action === "status") {
-                await updateAssetStatus(body, res);
-            } else if (action === "move") {
-                await moveAsset(body, res);
-            } else {
-                res.status(404).json({error: `Invalid action for resource 'assets': ${action}`});
-            }
+        } else if (method === "PUT" && pathSegments[1] === "status") {
+            await updateAssetStatus(body, res);
+        } else if (method === "PUT" && pathSegments[1] === "move") {
+            await moveAsset(body, res);
         } else {
             res.status(404).json({error: `Invalid endpoint for resource 'assets': ${method} ${path}`});
         }
@@ -297,5 +292,3 @@ async function moveAsset(data: unknown, res: any) {
     }
   }
 }
-
-    
