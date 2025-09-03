@@ -300,13 +300,13 @@ export function RoomDetailClient({ room, initialAssets, manager, assetTypes, all
       
       {/* Hidden container for PDF generation */}
       <div id="qr-code-grid-for-pdf" className="absolute -left-[9999px] top-auto w-[210mm] bg-white p-[10mm]">
-        <h1 style={{textAlign: 'center', marginBottom: '10px', fontSize: '18px'}}>Mã QR cho phòng: {room.name}</h1>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10mm', pageBreakInside: 'auto' }}>
+        <h1 style={{textAlign: 'center', marginBottom: '10px', fontSize: '16px'}}>Mã QR cho phòng: {room.name}</h1>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8mm', pageBreakInside: 'auto' }}>
             {assets.map((asset) => (
-                <div key={asset.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '1px solid #eee', padding: '5mm', borderRadius: '4px', pageBreakInside: 'avoid' }}>
-                    <QRCodeComponent value={asset.id} size={180} />
-                    <p style={{ marginTop: '5px', fontSize: '10px', textAlign: 'center', fontWeight: 'bold' }}>{asset.name}</p>
-                    <p style={{ fontSize: '8px', textAlign: 'center', fontFamily: 'monospace' }}>{asset.id}</p>
+                <div key={asset.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '1px solid #eee', padding: '4mm', borderRadius: '4px', pageBreakInside: 'avoid' }}>
+                    <QRCodeComponent value={asset.id} size={120} />
+                    <p style={{ marginTop: '4px', fontSize: '9px', textAlign: 'center', fontWeight: 'bold' }}>{asset.name}</p>
+                    <p style={{ fontSize: '7px', textAlign: 'center', fontFamily: 'monospace' }}>{asset.id}</p>
                 </div>
             ))}
         </div>
