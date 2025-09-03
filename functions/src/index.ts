@@ -67,23 +67,23 @@ export const api = onRequest(
       }
 
       const {path, method} = req;
-      const pathSegments = path.split("/").filter(Boolean);
+      // Remove '/api/' prefix and split
+      const pathSegments = path.replace(/^\/api\//, "").split("/").filter(Boolean);
 
       logger.info(`API Request: ${method} ${path}`, {structuredData: true});
       logger.info(`Path segments: ${JSON.stringify(pathSegments)}`, {structuredData: true});
       
-      const endpoint = pathSegments.length > 1 ? pathSegments[1] : pathSegments[0];
-      const id = pathSegments.length > 2 ? pathSegments[2] : (pathSegments.length > 1 ? pathSegments[1] : undefined);
+      const resource = pathSegments[0]; // e.g., 'rooms', 'assets'
+      const id = pathSegments[1]; // e.g., a specific room or asset id, or a sub-resource like 'status'
       
-      logger.info(`Endpoint: ${endpoint}`, {structuredData: true});
+      logger.info(`Resource: ${resource}`, {structuredData: true});
       if (id) {
-          logger.info(`ID: ${id}`, {structuredData: true});
+          logger.info(`ID/Sub-resource: ${id}`, {structuredData: true});
       }
-
 
       switch (method) {
       case "POST":
-        await handlePost(endpoint, req.body, res);
+        await handlePost(resource, req.body, res);
         break;
       case "PUT":
         await handlePut(pathSegments, req.body, res);
@@ -102,20 +102,20 @@ export const api = onRequest(
 
 /**
  * Handle POST requests
- * @param {string} endpoint - The endpoint to target
+ * @param {string} resource - The resource to target
  * @param {unknown} body - Request body
  * @param {any} res - Response object
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function handlePost(
-  endpoint: string,
+  resource: string,
   body: unknown,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   res: any
 ) {
-  logger.info(`Handling POST for endpoint: '${endpoint}'`, {structuredData: true});
+  logger.info(`Handling POST for resource: '${resource}'`, {structuredData: true});
 
-  switch (endpoint) {
+  switch (resource) {
   case "rooms":
     await addRoom(body, res);
     break;
@@ -123,8 +123,8 @@ async function handlePost(
     await addAsset(body, res);
     break;
   default:
-    logger.error(`POST Endpoint not found: '${endpoint}'`, {structuredData: true});
-    res.status(404).json({error: "Endpoint not found"});
+    logger.error(`POST Resource not found: '${resource}'`, {structuredData: true});
+    res.status(404).json({error: "Resource not found"});
   }
 }
 
@@ -136,32 +136,29 @@ async function handlePost(
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function handlePut(pathSegments: string[], body: unknown, res: any) {
-  const endpoint = pathSegments[0];
-  const id = pathSegments[1];
+  const resource = pathSegments[0];
+  const idOrAction = pathSegments[1];
+  const actionId = pathSegments[2];
 
-  switch (endpoint) {
+  switch (resource) {
   case "rooms":
-    if (id) {
-      await updateRoom(id, body, res);
+    if (idOrAction) {
+      await updateRoom(idOrAction, body, res);
     } else {
       res.status(400).json({error: "Room ID is required"});
     }
     break;
   case "assets":
-    if (pathSegments.length > 1) {
-        if (pathSegments[1] === "status") {
-            await updateAssetStatus(body, res);
-        } else if (pathSegments[1] === "move") {
-            await moveAsset(body, res);
-        } else {
-            res.status(404).json({error: "Action not found for assets"});
-        }
+    if (idOrAction === "status") {
+        await updateAssetStatus(body, res);
+    } else if (idOrAction === "move") {
+        await moveAsset(body, res);
     } else {
-        res.status(404).json({error: "Action not specified for assets"});
+        res.status(404).json({error: "Action not found for assets"});
     }
     break;
   default:
-    res.status(404).json({error: "Endpoint not found"});
+    res.status(404).json({error: "Resource not found"});
   }
 }
 
@@ -172,7 +169,7 @@ async function handlePut(pathSegments: string[], body: unknown, res: any) {
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function handleDelete(pathSegments: string[], res: any) {
-  const endpoint = pathSegments[0];
+  const resource = pathSegments[0];
   const id = pathSegments[1];
 
   if (!id) {
@@ -180,12 +177,12 @@ async function handleDelete(pathSegments: string[], res: any) {
     return;
   }
 
-  switch (endpoint) {
+  switch (resource) {
   case "rooms":
     await deleteRoom(id, res);
     break;
   default:
-    res.status(404).json({error: "Endpoint not found"});
+    res.status(404).json({error: "Resource not found"});
   }
 }
 
@@ -212,7 +209,11 @@ async function addRoom(data: unknown, res: any) {
     });
   } catch (error) {
     logger.error("Error adding room:", error);
-    res.status(400).json({error: "Dữ liệu không hợp lệ."});
+    if (error instanceof z.ZodError) {
+      res.status(400).json({error: "Dữ liệu không hợp lệ.", details: error.errors});
+    } else {
+      res.status(500).json({error: "Không thể thêm phòng."});
+    }
   }
 }
 
@@ -308,7 +309,11 @@ async function addAsset(data: unknown, res: any) {
     });
   } catch (error) {
     logger.error("Error adding asset:", error);
-    res.status(400).json({error: "Dữ liệu không hợp lệ."});
+    if (error instanceof z.ZodError) {
+      res.status(400).json({error: "Dữ liệu không hợp lệ.", details: error.errors});
+    } else {
+      res.status(500).json({error: "Không thể thêm tài sản."});
+    }
   }
 }
 
@@ -330,7 +335,11 @@ async function updateAssetStatus(data: unknown, res: any) {
     });
   } catch (error) {
     logger.error("Error updating asset status:", error);
-    res.status(400).json({error: "Dữ liệu không hợp lệ."});
+    if (error instanceof z.ZodError) {
+      res.status(400).json({error: "Dữ liệu không hợp lệ.", details: error.errors});
+    } else {
+      res.status(500).json({error: "Không thể cập nhật trạng thái."});
+    }
   }
 }
 
@@ -352,6 +361,12 @@ async function moveAsset(data: unknown, res: any) {
     });
   } catch (error) {
     logger.error("Error moving asset:", error);
-    res.status(400).json({error: "Dữ liệu không hợp lệ."});
+    if (error instanceof z.ZodError) {
+      res.status(400).json({error: "Dữ liệu không hợp lệ.", details: error.errors});
+    } else {
+      res.status(500).json({error: "Không thể di dời tài sản."});
+    }
   }
 }
+
+    
