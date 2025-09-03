@@ -110,7 +110,7 @@ export default async function AssetDetailPage({ params }: { params: Promise<{ id
                 </CardHeader>
                 <CardContent className="flex items-center justify-center p-2">
                     <div className="p-1.5 bg-white rounded-md border">
-                        <QRCodeComponent value={asset.id} size={150} />
+                        <QRCodeComponent value={asset.id} size={150} publicUrl={true} />
                     </div>
                 </CardContent>
             </Card>

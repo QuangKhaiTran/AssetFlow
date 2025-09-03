@@ -8,14 +8,20 @@ import Image from 'next/image';
 interface QRCodeComponentProps {
   value: string;
   size?: number;
+  publicUrl?: boolean; // If true, generate URL to public page, otherwise just the ID
 }
 
-export function QRCodeComponent({ value, size = 128 }: QRCodeComponentProps) {
+export function QRCodeComponent({ value, size = 128, publicUrl = false }: QRCodeComponentProps) {
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (value) {
-      QRCode.toDataURL(value, {
+      // Generate URL based on whether it's for public access or internal use
+      const qrValue = publicUrl
+        ? `${window.location.origin}/public/asset/${value}`
+        : value;
+
+      QRCode.toDataURL(qrValue, {
         errorCorrectionLevel: 'L', // Changed from 'H' to 'L' for a simpler QR code
         margin: 2,
         width: size,
@@ -27,7 +33,7 @@ export function QRCodeComponent({ value, size = 128 }: QRCodeComponentProps) {
           console.error(err);
         });
     }
-  }, [value, size]);
+  }, [value, size, publicUrl]);
 
   if (!qrCodeUrl) {
     return <Skeleton className="h-32 w-32" style={{ width: size, height: size }} />;

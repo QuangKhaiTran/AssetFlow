@@ -99,7 +99,7 @@ export function PrintQRCodesDialog({ assets, open, onOpenChange }: PrintQRCodesD
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 qr-grid-print">
               {assets.map((asset) => (
                 <div key={asset.id} className="flex flex-col items-center p-2 border rounded-lg qr-item-print">
-                   <QRCodeComponent value={asset.id} size={150} />
+                   <QRCodeComponent value={asset.id} size={150} publicUrl={true} />
                    <p className="mt-2 text-xs text-center font-semibold">{asset.name}</p>
                    <p className="text-xs text-muted-foreground font-mono">{asset.id}</p>
                 </div>

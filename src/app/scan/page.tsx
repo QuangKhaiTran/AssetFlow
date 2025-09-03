@@ -3,14 +3,17 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import jsQR from 'jsqr';
-import { QrCode, VideoOff, RefreshCw, RotateCcw, CheckCircle, Wrench, XCircle, Trash2, Calendar, Building, User, Eye } from 'lucide-react';
+import { QrCode, VideoOff, RefreshCw, RotateCcw, CheckCircle, Wrench, XCircle, Trash2, Calendar, Building, User, Eye, Settings, Shield, ShieldOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { getAssetById, getRoomById } from '@/lib/data';
+import { getAssetById, getRoomById, getRooms } from '@/lib/data';
 import { type Asset, type Room, type AssetStatus } from '@/lib/types';
 import { QRCodeComponent } from '@/components/qr-code';
+import { MoveAssetDialog } from '@/components/move-asset-dialog';
+import { UpdateStatusDialog } from '@/components/update-status-dialog';
+import { Badge } from '@/components/ui/badge';
 
 const statusConfig: Record<AssetStatus, { icon: React.ElementType, color: string }> = {
   'Đang sử dụng': { icon: CheckCircle, color: 'text-green-600' },
@@ -33,6 +36,8 @@ export default function ScanPage() {
     asset: Asset;
     room: Room | null;
   } | null>(null);
+  const [isManagementMode, setIsManagementMode] = useState(false);
+  const [allRooms, setAllRooms] = useState<Room[]>([]);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -42,32 +47,32 @@ export default function ScanPage() {
         // Get camera permission first
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
         setHasCameraPermission(true);
-        
+
         // Get list of video devices
         const devices = await navigator.mediaDevices.enumerateDevices();
         const videoDevices = devices.filter(device => device.kind === 'videoinput');
         setCameras(videoDevices);
-        
+
         // Stop the initial stream
         stream.getTracks().forEach(track => track.stop());
-        
+
         // Find back camera (environment) or use first camera
         let defaultCameraIndex = 0;
-        const backCameraIndex = videoDevices.findIndex(device => 
-          device.label.toLowerCase().includes('back') || 
+        const backCameraIndex = videoDevices.findIndex(device =>
+          device.label.toLowerCase().includes('back') ||
           device.label.toLowerCase().includes('environment') ||
           device.label.toLowerCase().includes('rear')
         );
-        
+
         if (backCameraIndex !== -1) {
           defaultCameraIndex = backCameraIndex;
         }
-        
+
         setCurrentCameraIndex(defaultCameraIndex);
-        
+
         // Start camera with selected device
         await startCamera(videoDevices[defaultCameraIndex]?.deviceId);
-        
+
       } catch (error) {
         console.error('Lỗi truy cập camera:', error);
         setHasCameraPermission(false);
@@ -86,6 +91,13 @@ export default function ScanPage() {
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Load rooms data when in management mode
+  useEffect(() => {
+    if (isManagementMode) {
+      getRooms().then(setAllRooms).catch(console.error);
+    }
+  }, [isManagementMode]);
 
   useEffect(() => {
     let animationFrameId: number;
@@ -168,30 +180,42 @@ export default function ScanPage() {
   };
 
   const handleResult = async (result: string) => {
-    // Check if the result is a valid asset ID
-    if (result && /^[a-zA-Z0-9]{10,}$/.test(result)) {
+    let assetId = result;
+
+    // Check if the result is a URL (public access)
+    if (result.includes('/public/asset/')) {
+      const urlMatch = result.match(/\/public\/asset\/([a-zA-Z0-9]+)/);
+      if (urlMatch) {
+        assetId = urlMatch[1];
+      }
+    }
+
+    // Check if the assetId is valid
+    if (assetId && /^[a-zA-Z0-9]{10,}$/.test(assetId)) {
       setIsLoadingAsset(true);
       try {
         // Fetch asset information
-        const asset = await getAssetById(result);
-        
+        const asset = await getAssetById(assetId);
+
         if (!asset) {
           throw new Error('Asset not found');
         }
-        
+
         // Fetch related information
         const room = await getRoomById(asset.roomId)
-        
+
         setAssetData({
           asset,
           room: room || null,
         });
-        
+
         toast({
           title: "Quét thành công!",
-          description: "Thông tin tài sản đã được tải.",
+          description: isManagementMode
+            ? "Thông tin tài sản đã được tải. Bạn có thể chỉnh sửa."
+            : "Thông tin tài sản đã được tải.",
         });
-        
+
       } catch (error) {
         console.error('Error fetching asset:', error);
         toast({
@@ -199,7 +223,7 @@ export default function ScanPage() {
           title: "Lỗi tải thông tin",
           description: "Không tìm thấy tài sản hoặc có lỗi xảy ra.",
         });
-        
+
         // Resume scanning after error
         setTimeout(() => {
           setScanResult(null);
@@ -212,9 +236,9 @@ export default function ScanPage() {
       toast({
         variant: "destructive",
         title: "Mã QR không hợp lệ",
-        description: `Nội dung không phải là ID tài sản hợp lệ.`,
+        description: `Nội dung không phải là mã QR tài sản hợp lệ.`,
       });
-      
+
       // Resume scanning after error
       setTimeout(() => {
         setScanResult(null);
@@ -236,6 +260,58 @@ export default function ScanPage() {
 
   return (
     <div className="flex flex-col gap-4">
+      {/* Mode Toggle */}
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {isManagementMode ? (
+                <Shield className="h-5 w-5 text-blue-600" />
+              ) : (
+                <Eye className="h-5 w-5 text-green-600" />
+              )}
+              <div>
+                <CardTitle className="text-base">
+                  {isManagementMode ? 'Chế độ quản lý' : 'Chế độ xem'}
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  {isManagementMode
+                    ? 'Quét để chỉnh sửa thông tin tài sản'
+                    : 'Quét để xem thông tin tài sản'
+                  }
+                </p>
+              </div>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsManagementMode(!isManagementMode)}
+              className="flex items-center gap-2"
+            >
+              {isManagementMode ? (
+                <>
+                  <ShieldOff className="h-4 w-4" />
+                  Chế độ xem
+                </>
+              ) : (
+                <>
+                  <Shield className="h-4 w-4" />
+                  Chế độ quản lý
+                </>
+              )}
+            </Button>
+          </div>
+          {isManagementMode && (
+            <div className="mt-2">
+              <Badge variant="secondary" className="text-xs">
+                <Shield className="h-3 w-3 mr-1" />
+                Chế độ quản lý đã kích hoạt
+              </Badge>
+            </div>
+          )}
+        </CardHeader>
+      </Card>
+
       <Card>
         <CardContent className="p-0">
           <div className="relative aspect-square w-full bg-muted flex items-center justify-center overflow-hidden rounded-lg">
@@ -358,9 +434,38 @@ export default function ScanPage() {
             </CardContent>
           </Card>
           
+          {/* Management Actions */}
+          {isManagementMode && allRooms.length > 0 && (
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Settings className="h-4 w-4" />
+                  Chức năng quản lý
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="grid grid-cols-1 gap-2">
+                  <MoveAssetDialog asset={assetData.asset} rooms={allRooms}>
+                    <Button variant="outline" size="sm" className="w-full justify-start">
+                      <Building className="h-4 w-4 mr-2" />
+                      Di dời đến phòng khác
+                    </Button>
+                  </MoveAssetDialog>
+
+                  <UpdateStatusDialog asset={assetData.asset}>
+                    <Button variant="outline" size="sm" className="w-full justify-start">
+                      <Settings className="h-4 w-4 mr-2" />
+                      Cập nhật trạng thái
+                    </Button>
+                  </UpdateStatusDialog>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Action Buttons */}
           <div className="flex gap-2">
-            <Button 
+            <Button
               onClick={() => {
                 setAssetData(null);
                 setScanResult(null);
@@ -372,12 +477,12 @@ export default function ScanPage() {
               <RefreshCw className="h-4 w-4 mr-2" />
               Quét lại
             </Button>
-            <Button 
+            <Button
               onClick={() => router.push(`/assets/${assetData.asset.id}`)}
               className="flex-1"
             >
               <Eye className="h-4 w-4 mr-2" />
-              Xem chi tiết
+              {isManagementMode ? 'Quản lý chi tiết' : 'Xem chi tiết'}
             </Button>
           </div>
         </div>

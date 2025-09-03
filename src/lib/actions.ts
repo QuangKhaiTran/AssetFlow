@@ -4,11 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { type Asset } from './types';
 
-// Helper to construct API URL
-const getApiUrl = (endpoint: string) => {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:9002/api';
-    return `${baseUrl}/${endpoint}`;
-};
+// Using Firebase client SDK directly instead of API calls to Firebase Functions
 
 
 // --- ROOM ACTIONS ---
@@ -20,15 +16,21 @@ export async function addRoom(formData: z.infer<typeof AddRoomSchema>) {
   const validatedData = AddRoomSchema.safeParse(formData);
   if (!validatedData.success) throw new Error('Dữ liệu không hợp lệ.');
 
-  const res = await fetch(getApiUrl('rooms'), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(validatedData.data),
-  });
-  if (!res.ok) throw new Error('Không thể thêm phòng.');
-  
-  revalidatePath('/');
-  return await res.json();
+  // Use Firebase client SDK directly instead of API call
+  const { addDoc, collection } = await import('firebase/firestore');
+  const { db } = await import('./firebase');
+
+  try {
+    const docRef = await addDoc(collection(db, 'rooms'), validatedData.data);
+    revalidatePath('/');
+    return {
+      message: "Đã thêm phòng thành công.",
+      id: docRef.id,
+    };
+  } catch (error) {
+    console.error('Error adding room:', error);
+    throw new Error('Không thể thêm phòng.');
+  }
 }
 
 const UpdateRoomSchema = z.object({
@@ -39,18 +41,24 @@ const UpdateRoomSchema = z.object({
 export async function updateRoom(formData: z.infer<typeof UpdateRoomSchema>) {
   const validatedData = UpdateRoomSchema.safeParse(formData);
   if (!validatedData.success) throw new Error('Dữ liệu không hợp lệ.');
-  
-  const { id, ...updateData } = validatedData.data;
-  const res = await fetch(getApiUrl(`rooms/${id}`), {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(updateData),
-  });
-  if (!res.ok) throw new Error('Không thể cập nhật phòng.');
 
-  revalidatePath('/');
-  revalidatePath(`/rooms/${id}`);
-  return await res.json();
+  const { id, ...updateData } = validatedData.data;
+
+  // Use Firebase client SDK directly instead of API call
+  const { doc, updateDoc } = await import('firebase/firestore');
+  const { db } = await import('./firebase');
+
+  try {
+    await updateDoc(doc(db, 'rooms', id), updateData);
+    revalidatePath('/');
+    revalidatePath(`/rooms/${id}`);
+    return {
+      message: "Cập nhật phòng thành công.",
+    };
+  } catch (error) {
+    console.error('Error updating room:', error);
+    throw new Error('Không thể cập nhật phòng.');
+  }
 }
 
 const DeleteRoomSchema = z.object({
@@ -59,16 +67,34 @@ const DeleteRoomSchema = z.object({
 export async function deleteRoom(formData: z.infer<typeof DeleteRoomSchema>) {
   const validatedData = DeleteRoomSchema.safeParse(formData);
   if (!validatedData.success) throw new Error('Dữ liệu không hợp lệ.');
-  
+
   const { id } = validatedData.data;
-  const res = await fetch(getApiUrl(`rooms/${id}`), { method: 'DELETE' });
-  const resBody = await res.json();
-  if (!res.ok) {
-     throw new Error(resBody.error || 'Không thể xóa phòng.');
+
+  // Use Firebase client SDK directly instead of API call
+  const { doc, deleteDoc, collection, getDocs, query, where } = await import('firebase/firestore');
+  const { db } = await import('./firebase');
+
+  try {
+    // Check if there are any assets in the room
+    const assetsQuery = query(collection(db, 'assets'), where('roomId', '==', id));
+    const assetsSnapshot = await getDocs(assetsQuery);
+
+    if (!assetsSnapshot.empty) {
+      throw new Error('Không thể xóa phòng có chứa tài sản.');
+    }
+
+    await deleteDoc(doc(db, 'rooms', id));
+    revalidatePath('/');
+    return {
+      message: "Xóa phòng thành công.",
+    };
+  } catch (error) {
+    console.error('Error deleting room:', error);
+    if (error.message === 'Không thể xóa phòng có chứa tài sản.') {
+      throw error;
+    }
+    throw new Error('Không thể xóa phòng.');
   }
-  
-  revalidatePath('/');
-  return resBody;
 }
 
 
@@ -81,17 +107,39 @@ const AddAssetSchema = z.object({
 export async function addAsset(formData: z.infer<typeof AddAssetSchema>): Promise<{ newAssets: Pick<Asset, 'id' | 'name'>[] }> {
     const validatedData = AddAssetSchema.safeParse(formData);
     if (!validatedData.success) throw new Error('Dữ liệu không hợp lệ.');
-    
-    const res = await fetch(getApiUrl('assets'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(validatedData.data),
-    });
-    if (!res.ok) throw new Error('Không thể thêm tài sản.');
 
-    revalidatePath(`/rooms/${validatedData.data.roomId}`);
-    revalidatePath('/');
-    return await res.json();
+    // Use Firebase client SDK directly instead of API call
+    const { addDoc, collection } = await import('firebase/firestore');
+    const { db } = await import('./firebase');
+
+    try {
+        const { name, quantity, roomId } = validatedData.data;
+        const newAssets: Pick<Asset, 'id' | 'name'>[] = [];
+
+        for (let i = 0; i < quantity; i++) {
+            const assetName = quantity > 1 ? `${name} #${i + 1}` : name;
+
+            const docRef = await addDoc(collection(db, 'assets'), {
+                name: assetName,
+                roomId,
+                status: 'Đang sử dụng',
+                dateAdded: new Date().toISOString().split('T')[0],
+            });
+
+            newAssets.push({ id: docRef.id, name: assetName });
+        }
+
+        revalidatePath(`/rooms/${roomId}`);
+        revalidatePath('/');
+
+        return {
+            message: "Đã thêm tài sản thành công.",
+            newAssets,
+        };
+    } catch (error) {
+        console.error('Error adding assets:', error);
+        throw new Error('Không thể thêm tài sản.');
+    }
 }
 
 
@@ -103,17 +151,25 @@ export async function updateAssetStatus(formData: z.infer<typeof UpdateAssetStat
     const validatedData = UpdateAssetStatusSchema.safeParse(formData);
     if (!validatedData.success) throw new Error('Dữ liệu không hợp lệ.');
 
-    const res = await fetch(getApiUrl('assets/status'), {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(validatedData.data),
-    });
-    if (!res.ok) throw new Error('Không thể cập nhật trạng thái.');
-    
-    revalidatePath(`/assets/${validatedData.data.assetId}`);
-    revalidatePath('/'); 
-    revalidatePath('/reports');
-    return await res.json();
+    // Use Firebase client SDK directly instead of API call
+    const { doc, updateDoc } = await import('firebase/firestore');
+    const { db } = await import('./firebase');
+
+    try {
+        const { assetId, status } = validatedData.data;
+        await updateDoc(doc(db, 'assets', assetId), { status });
+
+        revalidatePath(`/assets/${assetId}`);
+        revalidatePath('/');
+        revalidatePath('/reports');
+
+        return {
+            message: "Cập nhật trạng thái tài sản thành công.",
+        };
+    } catch (error) {
+        console.error('Error updating asset status:', error);
+        throw new Error('Không thể cập nhật trạng thái.');
+    }
 }
 
 
@@ -125,15 +181,23 @@ export async function moveAsset(formData: z.infer<typeof MoveAssetSchema>) {
     const validatedData = MoveAssetSchema.safeParse(formData);
     if (!validatedData.success) throw new Error('Dữ liệu không hợp lệ.');
 
-    const res = await fetch(getApiUrl('assets/move'), {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(validatedData.data),
-    });
-    if (!res.ok) throw new Error('Không thể di dời tài sản.');
+    // Use Firebase client SDK directly instead of API call
+    const { doc, updateDoc } = await import('firebase/firestore');
+    const { db } = await import('./firebase');
 
-    revalidatePath(`/assets/${validatedData.data.assetId}`);
-    revalidatePath(`/rooms/${validatedData.data.newRoomId}`);
-    revalidatePath('/'); 
-    return await res.json();
+    try {
+        const { assetId, newRoomId } = validatedData.data;
+        await updateDoc(doc(db, 'assets', assetId), { roomId: newRoomId });
+
+        revalidatePath(`/assets/${assetId}`);
+        revalidatePath(`/rooms/${newRoomId}`);
+        revalidatePath('/');
+
+        return {
+            message: "Di dời tài sản thành công.",
+        };
+    } catch (error) {
+        console.error('Error moving asset:', error);
+        throw new Error('Không thể di dời tài sản.');
+    }
 }
