@@ -30,7 +30,7 @@ export function RoomsTable({ rooms, assets }: RoomsTableProps) {
         <TableRow>
           <TableHead className="w-[50%] text-xs">Tên phòng</TableHead>
           <TableHead className="w-[40%] text-xs">Người quản lý</TableHead>
-          <TableHead className="w-[10%] text-center text-xs">Tài sản</TableHead>
+          <TableHead className="w-[10%] text-center text-xs whitespace-nowrap">Tài sản</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
