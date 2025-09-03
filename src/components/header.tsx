@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Bell, LogOut, LayoutDashboard, FileText, ClipboardList, QrCode, Users, Download, Bot, Building } from "lucide-react";
+import { Bell, LogOut, LayoutDashboard, FileText, QrCode, Download, Bot, Building } from "lucide-react";
 import { useAuth } from "./auth-provider";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
@@ -35,11 +35,6 @@ const menuItems = [
     label: "Báo cáo",
     icon: FileText,
   },
-  {
-    href: "/maintenance",
-    label: "Bảo trì",
-    icon: Bot,
-  }
 ];
 
 const pageConfig: Record<string, { title: string; icon: React.ElementType }> = {
@@ -54,10 +49,6 @@ const pageConfig: Record<string, { title: string; icon: React.ElementType }> = {
   "/reports": {
     title: "Báo cáo",
     icon: FileText,
-  },
-   "/maintenance": {
-    title: "Bảo trì dự đoán",
-    icon: Bot,
   },
     "rooms": {
         title: "Chi tiết phòng",

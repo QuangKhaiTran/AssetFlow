@@ -5,9 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   FileText,
-  ClipboardList,
   QrCode,
-  Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -27,11 +25,6 @@ const menuItems = [
     label: "Báo cáo",
     icon: FileText,
   },
-  {
-    href: "/maintenance",
-    label: "Bảo trì",
-    icon: Users,
-  }
 ];
 
 export function BottomNavigation() {
@@ -39,7 +32,7 @@ export function BottomNavigation() {
 
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 h-14 bg-card border-t z-20">
-      <div className="grid h-full grid-cols-4">
+      <div className="grid h-full grid-cols-3">
         {menuItems.map((item) => {
           const isActive = pathname === item.href || (item.href === "/" && pathname.startsWith("/rooms")) || (item.href === "/" && pathname.startsWith("/assets"));
           return (
