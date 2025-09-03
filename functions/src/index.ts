@@ -62,7 +62,7 @@ export const api = onRequest(
       setCorsHeaders(res);
 
       if (req.method === "OPTIONS") {
-        res.status(200).send();
+        res.status(204).send("");
         return;
       }
 
@@ -71,10 +71,19 @@ export const api = onRequest(
 
       logger.info(`API Request: ${method} ${path}`, {structuredData: true});
       logger.info(`Path segments: ${JSON.stringify(pathSegments)}`, {structuredData: true});
+      
+      const endpoint = pathSegments.length > 1 ? pathSegments[1] : pathSegments[0];
+      const id = pathSegments.length > 2 ? pathSegments[2] : (pathSegments.length > 1 ? pathSegments[1] : undefined);
+      
+      logger.info(`Endpoint: ${endpoint}`, {structuredData: true});
+      if (id) {
+          logger.info(`ID: ${id}`, {structuredData: true});
+      }
+
 
       switch (method) {
       case "POST":
-        await handlePost(pathSegments, req.body, res);
+        await handlePost(endpoint, req.body, res);
         break;
       case "PUT":
         await handlePut(pathSegments, req.body, res);
@@ -93,19 +102,18 @@ export const api = onRequest(
 
 /**
  * Handle POST requests
- * @param {string[]} pathSegments - URL path segments
+ * @param {string} endpoint - The endpoint to target
  * @param {unknown} body - Request body
  * @param {any} res - Response object
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function handlePost(
-  pathSegments: string[],
+  endpoint: string,
   body: unknown,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   res: any
 ) {
-  const endpoint = pathSegments[0]; // First segment after /api
-  logger.info(`Endpoint: '${endpoint}', Path segments: ${JSON.stringify(pathSegments)}`, {structuredData: true});
+  logger.info(`Handling POST for endpoint: '${endpoint}'`, {structuredData: true});
 
   switch (endpoint) {
   case "rooms":
@@ -115,7 +123,7 @@ async function handlePost(
     await addAsset(body, res);
     break;
   default:
-    logger.error(`Endpoint not found: '${endpoint}'`, {structuredData: true});
+    logger.error(`POST Endpoint not found: '${endpoint}'`, {structuredData: true});
     res.status(404).json({error: "Endpoint not found"});
   }
 }
@@ -140,12 +148,16 @@ async function handlePut(pathSegments: string[], body: unknown, res: any) {
     }
     break;
   case "assets":
-    if (pathSegments[1] === "status") {
-      await updateAssetStatus(body, res);
-    } else if (pathSegments[1] === "move") {
-      await moveAsset(body, res);
+    if (pathSegments.length > 1) {
+        if (pathSegments[1] === "status") {
+            await updateAssetStatus(body, res);
+        } else if (pathSegments[1] === "move") {
+            await moveAsset(body, res);
+        } else {
+            res.status(404).json({error: "Action not found for assets"});
+        }
     } else {
-      res.status(404).json({error: "Action not found for assets"});
+        res.status(404).json({error: "Action not specified for assets"});
     }
     break;
   default:
@@ -343,3 +355,5 @@ async function moveAsset(data: unknown, res: any) {
     res.status(400).json({error: "Dữ liệu không hợp lệ."});
   }
 }
+
+    
