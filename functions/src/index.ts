@@ -355,5 +355,3 @@ async function moveAsset(data: unknown, res: any) {
     res.status(400).json({error: "Dữ liệu không hợp lệ."});
   }
 }
-
-    
