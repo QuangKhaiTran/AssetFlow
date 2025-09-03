@@ -20,7 +20,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Calendar, PlusCircle, CheckCircle, Wrench, XCircle, Trash2, FileDown, Search, Filter, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowLeft, Calendar, PlusCircle, CheckCircle, Wrench, XCircle, Trash2, FileDown, Search, Filter, X, ChevronDown, ChevronUp, MoreVertical, Edit, Trash } from 'lucide-react';
 import { type AssetStatus, type Room, type Asset, type AssetType, type User as UserType } from '@/lib/types';
 import { AddAssetDialog } from '@/components/add-asset-dialog';
 import { QRCodeComponent } from '@/components/qr-code';
@@ -37,6 +37,14 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { EditRoomDialog } from './edit-room-dialog';
+import { DeleteRoomDialog } from './delete-room-dialog';
 
 const statusConfig: Record<AssetStatus, { icon: React.ElementType, color: string }> = {
     'Đang sử dụng': { icon: CheckCircle, color: 'text-green-600' },
@@ -45,7 +53,7 @@ const statusConfig: Record<AssetStatus, { icon: React.ElementType, color: string
     'Đã thanh lý': { icon: Trash2, color: 'text-gray-500' },
 };
 
-export function RoomDetailClient({ room, initialAssets, manager: _manager, assetTypes }: { room: Room, initialAssets: Asset[], manager: UserType | null, assetTypes: AssetType[] }) {
+export function RoomDetailClient({ room, initialAssets, manager, assetTypes, allUsers }: { room: Room, initialAssets: Asset[], manager: UserType | null, assetTypes: AssetType[], allUsers: UserType[] }) {
   const [assets, setAssets] = useState(initialAssets);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -146,6 +154,27 @@ export function RoomDetailClient({ room, initialAssets, manager: _manager, asset
                       Thêm
                   </Button>
                 </AddAssetDialog>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreVertical className="h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <EditRoomDialog room={room} users={allUsers}>
+                            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                <Edit className="mr-2 h-4 w-4" />
+                                <span>Chỉnh sửa</span>
+                            </DropdownMenuItem>
+                        </EditRoomDialog>
+                        <DeleteRoomDialog room={room}>
+                             <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-600 focus:text-red-600 focus:bg-red-50">
+                                <Trash className="mr-2 h-4 w-4" />
+                                <span>Xóa phòng</span>
+                            </DropdownMenuItem>
+                        </DeleteRoomDialog>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
           </div>
         </CardHeader>

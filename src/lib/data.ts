@@ -17,18 +17,18 @@ export async function getUsers(): Promise<User[]> {
   }
 }
 
-export async function getUserById(id: string): Promise<User | undefined> {
+export async function getUserById(id: string): Promise<User | null> {
     try {
-        if (!id) return undefined;
+        if (!id) return null;
         const userDocRef = doc(db, 'users', id);
         const userSnap = await getDoc(userDocRef);
         if (userSnap.exists()) {
             return { id: userSnap.id, ...userSnap.data() } as User;
         }
-        return undefined;
+        return null;
     } catch (error) {
         console.error("Lỗi khi lấy thông tin người dùng:", error);
-        return undefined;
+        return null;
     }
 }
 
@@ -45,18 +45,18 @@ export async function getRooms(): Promise<Room[]> {
   }
 }
 
-export async function getRoomById(id: string): Promise<Room | undefined> {
+export async function getRoomById(id: string): Promise<Room | null> {
   try {
-    if (!id) return undefined;
+    if (!id) return null;
     const roomDocRef = doc(db, 'rooms', id);
     const roomSnap = await getDoc(roomDocRef);
     if (roomSnap.exists()) {
         return { id: roomSnap.id, ...roomSnap.data() } as Room;
     }
-    return undefined;
+    return null;
   } catch(error) {
       console.error("Lỗi khi lấy thông tin phòng:", error);
-      return undefined;
+      return null;
   }
 }
 
@@ -72,18 +72,18 @@ export async function getAssets(): Promise<Asset[]> {
     }
 }
 
-export async function getAssetById(id: string): Promise<Asset | undefined> {
+export async function getAssetById(id: string): Promise<Asset | null> {
     try {
-        if (!id) return undefined;
+        if (!id) return null;
         const assetDocRef = doc(db, 'assets', id);
         const assetSnap = await getDoc(assetDocRef);
         if (assetSnap.exists()) {
             return { id: assetSnap.id, ...assetSnap.data() } as Asset;
         }
-        return undefined;
+        return null;
     } catch (error) {
         console.error("Lỗi khi lấy thông tin tài sản:", error);
-        return undefined;
+        return null;
     }
 }
 
@@ -114,17 +114,17 @@ export async function getAssetTypes(): Promise<AssetType[]> {
     }
 }
 
-export async function getAssetTypeById(id: string): Promise<AssetType | undefined> {
+export async function getAssetTypeById(id: string): Promise<AssetType | null> {
     try {
-        if (!id) return undefined;
+        if (!id) return null;
         const assetTypeDocRef = doc(db, 'assetTypes', id);
         const assetTypeSnap = await getDoc(assetTypeDocRef);
         if (assetTypeSnap.exists()) {
             return { id: assetTypeSnap.id, ...assetTypeSnap.data() } as AssetType;
         }
-        return undefined;
+        return null;
     } catch (error) {
         console.error("Lỗi khi lấy thông tin loại tài sản:", error);
-        return undefined;
+        return null;
     }
 }

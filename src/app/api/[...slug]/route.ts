@@ -1,47 +1,48 @@
 // Next.js API proxy route to forward requests to Firebase Functions
 // This resolves CORS issues and provides consistent API endpoints
 
-export async function POST(
+async function proxyRequest(
   request: Request,
-  { params }: { params: Promise<{ slug: string[] }> }
+  endpoint: string
 ) {
-  try {
-    const body = await request.text();
-    const resolvedParams = await params;
-    const endpoint = resolvedParams.slug.join('/');
-    
-    // Get Firebase Functions URL based on environment
-    const firebaseFunctionsUrl = process.env.NODE_ENV === 'production' 
+  const firebaseFunctionsUrl = process.env.NODE_ENV === 'production' 
       ? 'https://us-central1-assetflow-p3qcd.cloudfunctions.net/api'
       : 'http://127.0.0.1:5003/assetflow-p3qcd/us-central1/api';
     
-    const url = `${firebaseFunctionsUrl}/${endpoint}`;
-    
-    console.log(`Proxying POST request to: ${url}`);
-    
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: body,
-    });
+  const url = `${firebaseFunctionsUrl}/${endpoint}`;
+  
+  console.log(`Proxying ${request.method} request to: ${url}`);
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`Firebase Functions error: ${response.status} - ${errorText}`);
-      return new Response(errorText, { 
-        status: response.status,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
+  const body = request.method !== 'GET' && request.method !== 'DELETE' ? await request.text() : undefined;
+  
+  const response = await fetch(url, {
+    method: request.method,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: body,
+  });
 
-    const responseData = await response.text();
-    return new Response(responseData, {
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error(`Firebase Functions error: ${response.status} - ${errorText}`);
+    return new Response(errorText, { 
       status: response.status,
       headers: { 'Content-Type': 'application/json' }
     });
+  }
 
+  const responseData = await response.text();
+  return new Response(responseData, {
+    status: response.status,
+    headers: { 'Content-Type': 'application/json' }
+  });
+}
+
+async function handleRequest(request: Request, { params }: { params: { slug: string[] } }) {
+   try {
+    const endpoint = params.slug.join('/');
+    return await proxyRequest(request, endpoint);
   } catch (error) {
     console.error('API Proxy Error:', error);
     return new Response(
@@ -54,55 +55,24 @@ export async function POST(
   }
 }
 
+
+export async function POST(
+  request: Request,
+  { params }: { params: { slug: string[] } }
+) {
+  return handleRequest(request, { params });
+}
+
 export async function PUT(
   request: Request,
-  { params }: { params: Promise<{ slug: string[] }> }
+  { params }: { params: { slug: string[] } }
 ) {
-  try {
-    const body = await request.text();
-    const resolvedParams = await params;
-    const endpoint = resolvedParams.slug.join('/');
-    
-    // Get Firebase Functions URL based on environment
-    const firebaseFunctionsUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://us-central1-assetflow-p3qcd.cloudfunctions.net/api'
-      : 'http://127.0.0.1:5003/assetflow-p3qcd/us-central1/api';
-    
-    const url = `${firebaseFunctionsUrl}/${endpoint}`;
-    
-    console.log(`Proxying PUT request to: ${url}`);
-    
-    const response = await fetch(url, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: body,
-    });
+  return handleRequest(request, { params });
+}
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`Firebase Functions error: ${response.status} - ${errorText}`);
-      return new Response(errorText, { 
-        status: response.status,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-
-    const responseData = await response.text();
-    return new Response(responseData, {
-      status: response.status,
-      headers: { 'Content-Type': 'application/json' }
-    });
-
-  } catch (error) {
-    console.error('API Proxy Error:', error);
-    return new Response(
-      JSON.stringify({ error: 'Internal proxy error' }), 
-      { 
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      }
-    );
-  }
+export async function DELETE(
+  request: Request,
+  { params }: { params: { slug: string[] } }
+) {
+  return handleRequest(request, { params });
 }

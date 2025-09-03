@@ -30,6 +30,11 @@ const AddRoomSchema = z.object({
   managerId: z.string().min(1),
 });
 
+const UpdateRoomSchema = z.object({
+  name: z.string().min(1).optional(),
+  managerId: z.string().min(1).optional(),
+});
+
 const AddAssetSchema = z.object({
   name: z.string().min(1),
   quantity: z.number().int().min(1),
@@ -83,6 +88,9 @@ export const api = onRequest(
       case "PUT":
         await handlePut(pathSegments, req.body, res);
         break;
+      case "DELETE":
+        await handleDelete(pathSegments, res);
+        break;
       default:
         res.status(405).json({error: "Method not allowed"});
       }
@@ -135,23 +143,55 @@ async function handlePost(
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function handlePut(pathSegments: string[], body: unknown, res: any) {
-  const endpoint = pathSegments[0]; // First segment after /api
-  const action = pathSegments[1];
+  const endpoint = pathSegments[0];
+  const id = pathSegments[1];
 
   switch (endpoint) {
+  case "rooms":
+    if (id) {
+      await updateRoom(id, body, res);
+    } else {
+      res.status(400).json({error: "Room ID is required"});
+    }
+    break;
   case "assets":
-    if (action === "status") {
+    if (pathSegments[1] === "status") {
       await updateAssetStatus(body, res);
-    } else if (action === "move") {
+    } else if (pathSegments[1] === "move") {
       await moveAsset(body, res);
     } else {
-      res.status(404).json({error: "Action not found"});
+      res.status(404).json({error: "Action not found for assets"});
     }
     break;
   default:
     res.status(404).json({error: "Endpoint not found"});
   }
 }
+
+/**
+ * Handle DELETE requests
+ * @param {string[]} pathSegments - URL path segments
+ * @param {any} res - Response object
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function handleDelete(pathSegments: string[], res: any) {
+  const endpoint = pathSegments[0];
+  const id = pathSegments[1];
+
+  if (!id) {
+    res.status(400).json({error: "ID is required"});
+    return;
+  }
+
+  switch (endpoint) {
+  case "rooms":
+    await deleteRoom(id, res);
+    break;
+  default:
+    res.status(404).json({error: "Endpoint not found"});
+  }
+}
+
 
 /**
  * Add a new room
@@ -176,6 +216,62 @@ async function addRoom(data: unknown, res: any) {
   } catch (error) {
     logger.error("Error adding room:", error);
     res.status(400).json({error: "Dữ liệu không hợp lệ."});
+  }
+}
+
+/**
+ * Update an existing room
+ * @param {string} id - The ID of the room to update
+ * @param {unknown} data - Request data
+ * @param {any} res - Response object
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function updateRoom(id: string, data: unknown, res: any) {
+  try {
+    const validatedData = UpdateRoomSchema.parse(data);
+    if (Object.keys(validatedData).length === 0) {
+      res.status(400).json({error: "No update data provided."});
+      return;
+    }
+
+    await db.collection("rooms").doc(id).update(validatedData);
+
+    res.status(200).json({
+      message: "Cập nhật phòng thành công.",
+    });
+  } catch (error) {
+    logger.error(`Error updating room ${id}:`, error);
+    if (error instanceof z.ZodError) {
+      res.status(400).json({error: "Dữ liệu không hợp lệ.", details: error.errors});
+    } else {
+      res.status(500).json({error: "Không thể cập nhật phòng."});
+    }
+  }
+}
+
+/**
+ * Delete a room
+ * @param {string} id - The ID of the room to delete
+ * @param {any} res - Response object
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function deleteRoom(id: string, res: any) {
+  try {
+    // Check if there are any assets in the room
+    const assetsSnapshot = await db.collection("assets").where("roomId", "==", id).limit(1).get();
+    if (!assetsSnapshot.empty) {
+      res.status(400).json({error: "Không thể xóa phòng có chứa tài sản."});
+      return;
+    }
+
+    await db.collection("rooms").doc(id).delete();
+
+    res.status(200).json({
+      message: "Xóa phòng thành công.",
+    });
+  } catch (error) {
+    logger.error(`Error deleting room ${id}:`, error);
+    res.status(500).json({error: "Không thể xóa phòng."});
   }
 }
 

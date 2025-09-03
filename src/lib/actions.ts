@@ -3,173 +3,180 @@
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { type Asset, type AssetStatus } from './types';
-import { db } from './firebase';
-import { collection, addDoc, doc, updateDoc, writeBatch } from 'firebase/firestore';
 
-// Schema for adding a room
+// Helper to construct API URL
+const getApiUrl = (endpoint: string) => {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:9002/api';
+    return `${baseUrl}/${endpoint}`;
+};
+
+
+// --- ROOM ACTIONS ---
 const AddRoomSchema = z.object({
-  name: z.string().min(1),
-  managerId: z.string().min(1),
+  name: z.string().min(1, 'Tên phòng là bắt buộc.'),
+  managerId: z.string().min(1, 'Vui lòng chọn người quản lý.'),
 });
-
 export async function addRoom(formData: z.infer<typeof AddRoomSchema>) {
   const validatedData = AddRoomSchema.safeParse(formData);
-  if (!validatedData.success) {
-    throw new Error('Dữ liệu không hợp lệ.');
-  }
+  if (!validatedData.success) throw new Error('Dữ liệu không hợp lệ.');
 
-  try {
-    const { name, managerId } = validatedData.data;
-    const roomsCol = collection(db, 'rooms');
-    await addDoc(roomsCol, {
-      name,
-      managerId,
-    });
-    revalidatePath('/');
-    return { message: 'Đã thêm phòng thành công.' };
-  } catch (error) {
-    console.error("Lỗi khi thêm phòng:", error);
-    throw new Error('Không thể thêm phòng.');
-  }
+  const res = await fetch(getApiUrl('rooms'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(validatedData.data),
+  });
+  if (!res.ok) throw new Error('Không thể thêm phòng.');
+  
+  revalidatePath('/');
+  return await res.json();
 }
 
-// Schema for adding an asset
+const UpdateRoomSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1, 'Tên phòng là bắt buộc.'),
+  managerId: z.string().min(1, 'Vui lòng chọn người quản lý.'),
+});
+export async function updateRoom(formData: z.infer<typeof UpdateRoomSchema>) {
+  const validatedData = UpdateRoomSchema.safeParse(formData);
+  if (!validatedData.success) throw new Error('Dữ liệu không hợp lệ.');
+  
+  const { id, ...updateData } = validatedData.data;
+  const res = await fetch(getApiUrl(`rooms/${id}`), {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(updateData),
+  });
+  if (!res.ok) throw new Error('Không thể cập nhật phòng.');
+
+  revalidatePath('/');
+  revalidatePath(`/rooms/${id}`);
+  return await res.json();
+}
+
+const DeleteRoomSchema = z.object({
+  id: z.string().min(1),
+});
+export async function deleteRoom(formData: z.infer<typeof DeleteRoomSchema>) {
+  const validatedData = DeleteRoomSchema.safeParse(formData);
+  if (!validatedData.success) throw new Error('Dữ liệu không hợp lệ.');
+  
+  const { id } = validatedData.data;
+  const res = await fetch(getApiUrl(`rooms/${id}`), { method: 'DELETE' });
+  const resBody = await res.json();
+  if (!res.ok) {
+     throw new Error(resBody.error || 'Không thể xóa phòng.');
+  }
+  
+  revalidatePath('/');
+  return resBody;
+}
+
+
+// --- ASSET ACTIONS ---
 const AddAssetSchema = z.object({
     name: z.string().min(1),
     quantity: z.number().int().min(1),
     roomId: z.string().min(1),
     assetTypeId: z.string().min(1),
 });
-
 export async function addAsset(formData: z.infer<typeof AddAssetSchema>): Promise<{ newAssets: Pick<Asset, 'id' | 'name'>[] }> {
     const validatedData = AddAssetSchema.safeParse(formData);
-    if (!validatedData.success) {
-        throw new Error('Dữ liệu không hợp lệ.');
-    }
-    const { name, quantity, roomId, assetTypeId } = validatedData.data;
-    const newAssets: Pick<Asset, 'id' | 'name'>[] = [];
+    if (!validatedData.success) throw new Error('Dữ liệu không hợp lệ.');
     
-    const assetsCol = collection(db, 'assets');
-    const batch = writeBatch(db);
+    const res = await fetch(getApiUrl('assets'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(validatedData.data),
+    });
+    if (!res.ok) throw new Error('Không thể thêm tài sản.');
 
-    for (let i = 0; i < quantity; i++) {
-        const newAssetDocRef = doc(assetsCol); // Auto-generate ID
-        const assetName = quantity > 1 ? `${name} #${i + 1}` : name;
-        const newAssetData = {
-            name: assetName,
-            roomId,
-            status: 'Đang sử dụng' as AssetStatus,
-            dateAdded: new Date().toISOString().split('T')[0],
-            assetTypeId,
-        };
-        batch.set(newAssetDocRef, newAssetData);
-        newAssets.push({ id: newAssetDocRef.id, name: assetName });
-    }
-    
-    await batch.commit();
-    
-    revalidatePath(`/rooms/${roomId}`);
+    revalidatePath(`/rooms/${validatedData.data.roomId}`);
     revalidatePath('/asset-management');
     revalidatePath('/');
-    return { newAssets };
+    return await res.json();
 }
 
-// Schema for updating asset status
+
 const UpdateAssetStatusSchema = z.object({
     assetId: z.string().min(1),
     status: z.enum(['Đang sử dụng', 'Đang sửa chữa', 'Bị hỏng', 'Đã thanh lý']),
 });
-
 export async function updateAssetStatus(formData: z.infer<typeof UpdateAssetStatusSchema>) {
     const validatedData = UpdateAssetStatusSchema.safeParse(formData);
-    if (!validatedData.success) {
-        throw new Error('Dữ liệu không hợp lệ.');
-    }
+    if (!validatedData.success) throw new Error('Dữ liệu không hợp lệ.');
 
-    const { assetId, status } = validatedData.data;
-    const assetDocRef = doc(db, 'assets', assetId);
-
-    // To revalidate paths, we might need to fetch the asset first to get roomId.
-    // For simplicity now, we revalidate generic paths.
-    // In a real app, you might fetch the doc before update.
-    await updateDoc(assetDocRef, { status });
-
-    revalidatePath(`/assets/${assetId}`);
-    revalidatePath('/'); // Revalidates all pages that might show asset status
+    const res = await fetch(getApiUrl('assets/status'), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(validatedData.data),
+    });
+    if (!res.ok) throw new Error('Không thể cập nhật trạng thái.');
+    
+    revalidatePath(`/assets/${validatedData.data.assetId}`);
+    revalidatePath('/'); 
     revalidatePath('/asset-management');
     revalidatePath('/reports');
-    revalidatePath('/users');
-    // A more robust solution would be to get the room ID and revalidate that specific room page.
-    return { message: 'Cập nhật trạng thái tài sản thành công.' };
+    return await res.json();
 }
 
-// Schema for moving an asset
+
 const MoveAssetSchema = z.object({
     assetId: z.string().min(1),
     newRoomId: z.string().min(1),
 });
-
 export async function moveAsset(formData: z.infer<typeof MoveAssetSchema>) {
     const validatedData = MoveAssetSchema.safeParse(formData);
-    if (!validatedData.success) {
-        throw new Error('Dữ liệu không hợp lệ.');
-    }
+    if (!validatedData.success) throw new Error('Dữ liệu không hợp lệ.');
 
-    const { assetId, newRoomId } = validatedData.data;
-    const assetDocRef = doc(db, 'assets', assetId);
+    const res = await fetch(getApiUrl('assets/move'), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(validatedData.data),
+    });
+    if (!res.ok) throw new Error('Không thể di dời tài sản.');
 
-    await updateDoc(assetDocRef, { roomId: newRoomId });
-
-    // This requires knowing old and new room IDs.
-    // Revalidating multiple paths to ensure data consistency.
-    revalidatePath(`/assets/${assetId}`);
-    revalidatePath(`/rooms/${newRoomId}`);
-    // We don't know the old room ID here without another read, so revalidate all rooms for simplicity
+    revalidatePath(`/assets/${validatedData.data.assetId}`);
+    revalidatePath(`/rooms/${validatedData.data.newRoomId}`);
     revalidatePath('/'); 
-    return { message: 'Di dời tài sản thành công.' };
+    return await res.json();
 }
 
-// Schema for adding an asset type
+
+// --- ASSET TYPE ACTIONS ---
 const AddAssetTypeSchema = z.object({
   name: z.string().min(1, 'Tên loại tài sản là bắt buộc.'),
 });
-
 export async function addAssetType(formData: z.infer<typeof AddAssetTypeSchema>) {
   const validatedData = AddAssetTypeSchema.safeParse(formData);
-  if (!validatedData.success) {
-    throw new Error('Dữ liệu không hợp lệ.');
-  }
+  if (!validatedData.success) throw new Error('Dữ liệu không hợp lệ.');
   
-  const { name } = validatedData.data;
-  
-  const assetTypesCol = collection(db, 'assetTypes');
-  await addDoc(assetTypesCol, { name });
-  
+  const res = await fetch(getApiUrl('asset-types'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(validatedData.data),
+  });
+  if (!res.ok) throw new Error('Không thể thêm loại tài sản.');
+
   revalidatePath('/asset-management');
-  return { message: 'Đã thêm loại tài sản thành công.' };
+  return await res.json();
 }
 
-// Schema for adding a user
+
+// --- USER ACTIONS ---
 const AddUserSchema = z.object({
   name: z.string().min(1, 'Tên người dùng là bắt buộc.'),
 });
-
 export async function addUser(formData: z.infer<typeof AddUserSchema>) {
   const validatedData = AddUserSchema.safeParse(formData);
-  if (!validatedData.success) {
-    throw new Error('Dữ liệu không hợp lệ.');
-  }
+  if (!validatedData.success) throw new Error('Dữ liệu không hợp lệ.');
+  
+  const res = await fetch(getApiUrl('users'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(validatedData.data),
+  });
+  if (!res.ok) throw new Error('Không thể thêm người dùng.');
 
-  try {
-    const { name } = validatedData.data;
-    const usersCol = collection(db, 'users');
-    await addDoc(usersCol, {
-      name,
-    });
-    revalidatePath('/users');
-    return { message: 'Đã thêm người dùng thành công.' };
-  } catch (error) {
-    console.error("Lỗi khi thêm người dùng:", error);
-    throw new Error('Không thể thêm người dùng.');
-  }
+  revalidatePath('/users');
+  return await res.json();
 }
