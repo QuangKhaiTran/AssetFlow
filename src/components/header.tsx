@@ -10,12 +10,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Bell, LogOut, LayoutDashboard, FileText, ClipboardList, QrCode, Users, Download } from "lucide-react";
+import { Bell, LogOut, LayoutDashboard, FileText, ClipboardList, QrCode, Users, Download, Bot, Building } from "lucide-react";
 import { useAuth } from "./auth-provider";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useRouter, usePathname } from "next/navigation";
-import { PageHeader } from "./page-header";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { usePWAInstall } from "@/hooks/use-pwa-install";
@@ -48,6 +47,77 @@ const menuItems = [
   }
 ];
 
+const pageConfig: Record<string, { title: string; icon: React.ElementType }> = {
+  "/": {
+    title: "Tổng quan",
+    icon: LayoutDashboard,
+  },
+  "/asset-management": {
+    title: "Quản lý loại tài sản",
+    icon: ClipboardList,
+  },
+   "/asset-types": {
+    title: "Chi tiết loại tài sản",
+    icon: ClipboardList,
+  },
+  "/scan": {
+    title: "Quét mã QR",
+    icon: QrCode,
+  },
+  "/reports": {
+    title: "Báo cáo",
+    icon: FileText,
+  },
+  "/users": {
+    title: "Quản lý người dùng",
+    icon: Users,
+  },
+   "/maintenance": {
+    title: "Bảo trì dự đoán",
+    icon: Bot,
+  },
+    "rooms": {
+        title: "Chi tiết phòng",
+        icon: Building,
+    },
+    "assets": {
+        title: "Chi tiết tài sản",
+        icon: FileText, 
+    }
+};
+
+const PageTitle = () => {
+    const pathname = usePathname();
+    const pathSegments = pathname.split('/').filter(Boolean);
+    let config = pageConfig[pathname];
+
+    if (!config && pathSegments.length > 0) {
+        const pageType = pathSegments[0];
+        if (pageConfig[pageType]) {
+            config = pageConfig[pageType]
+        }
+    }
+  
+    if (!config) {
+        // Fallback for paths like /asset-types/[id]
+        if (pathname.startsWith('/asset-types/')) {
+            config = pageConfig['/asset-types'];
+        } else {
+            return null;
+        }
+    }
+  
+    const Icon = config.icon;
+
+    return (
+        <div className="flex items-center gap-2">
+            <Icon className="h-4 w-4 text-primary" />
+            <h1 className="text-sm md:text-base font-bold tracking-tight">{config.title}</h1>
+        </div>
+    );
+};
+
+
 export function Header() {
   const { user } = useAuth();
   const router = useRouter();
@@ -67,7 +137,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-10 flex h-12 items-center gap-4 border-b bg-card px-4 sm:px-6">
       <div className="flex-1 flex items-center gap-6">
-        <PageHeader />
+        <PageTitle />
         {/* Desktop Navigation - Hidden on mobile */}
         <nav className="hidden md:flex items-center gap-1">
           {menuItems.map((item) => {
