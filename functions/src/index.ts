@@ -134,7 +134,7 @@ async function addRoom(data: unknown, res: any) {
   } catch (error) {
     logger.error("Error adding room:", error);
     if (error instanceof z.ZodError) {
-      res.status(400).json({error: "Dữ liệu không hợp lệ.", details: error.errors});
+      res.status(400).json({error: "Dữ liệu không hợp lệ.", details: error.issues});
     } else {
       res.status(500).json({error: "Không thể thêm phòng."});
     }
@@ -164,7 +164,7 @@ async function updateRoom(id: string, data: unknown, res: any) {
   } catch (error) {
     logger.error(`Error updating room ${id}:`, error);
     if (error instanceof z.ZodError) {
-      res.status(400).json({error: "Dữ liệu không hợp lệ.", details: error.errors});
+      res.status(400).json({error: "Dữ liệu không hợp lệ.", details: error.issues});
     } else {
       res.status(500).json({error: "Không thể cập nhật phòng."});
     }
@@ -234,7 +234,7 @@ async function addAsset(data: unknown, res: any) {
   } catch (error) {
     logger.error("Error adding asset:", error);
     if (error instanceof z.ZodError) {
-      res.status(400).json({error: "Dữ liệu không hợp lệ.", details: error.errors});
+      res.status(400).json({error: "Dữ liệu không hợp lệ.", details: error.issues});
     } else {
       res.status(500).json({error: "Không thể thêm tài sản."});
     }
@@ -260,7 +260,7 @@ async function updateAssetStatus(data: unknown, res: any) {
   } catch (error) {
     logger.error("Error updating asset status:", error);
     if (error instanceof z.ZodError) {
-      res.status(400).json({error: "Dữ liệu không hợp lệ.", details: error.errors});
+      res.status(400).json({error: "Dữ liệu không hợp lệ.", details: error.issues});
     } else {
       res.status(500).json({error: "Không thể cập nhật trạng thái."});
     }
@@ -286,7 +286,7 @@ async function moveAsset(data: unknown, res: any) {
   } catch (error) {
     logger.error("Error moving asset:", error);
     if (error instanceof z.ZodError) {
-      res.status(400).json({error: "Dữ liệu không hợp lệ.", details: error.errors});
+      res.status(400).json({error: "Dữ liệu không hợp lệ.", details: error.issues});
     } else {
       res.status(500).json({error: "Không thể di dời tài sản."});
     }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from 'react';
+import { lazy, Suspense, useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import jsQR from 'jsqr';
 import { QrCode, VideoOff, RefreshCw, RotateCcw, CheckCircle, Wrench, XCircle, Trash2, Calendar, Building, User, Eye, Settings, Shield, ShieldOff } from 'lucide-react';
@@ -10,10 +10,13 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { getAssetById, getRoomById, getRooms } from '@/lib/data';
 import { type Asset, type Room, type AssetStatus } from '@/lib/types';
-import { QRCodeComponent } from '@/components/qr-code';
-import { MoveAssetDialog } from '@/components/move-asset-dialog';
-import { UpdateStatusDialog } from '@/components/update-status-dialog';
 import { Badge } from '@/components/ui/badge';
+import { QRCodeSkeleton } from '@/components/ui/skeleton';
+
+// Lazy load heavy components
+const QRCodeComponent = lazy(() => import('@/components/qr-code').then(mod => ({ default: mod.QRCodeComponent })));
+const MoveAssetDialog = lazy(() => import('@/components/move-asset-dialog').then(mod => ({ default: mod.MoveAssetDialog })));
+const UpdateStatusDialog = lazy(() => import('@/components/update-status-dialog').then(mod => ({ default: mod.UpdateStatusDialog })));
 
 const statusConfig: Record<AssetStatus, { icon: React.ElementType, color: string }> = {
   'Đang sử dụng': { icon: CheckCircle, color: 'text-green-600' },
@@ -425,7 +428,9 @@ export default function ScanPage() {
               <div className="space-y-2">
                 <div className="text-sm text-muted-foreground">Mã QR tài sản:</div>
                 <div className="flex justify-center">
-                  <QRCodeComponent value={assetData.asset.id} size={120} />
+                  <Suspense fallback={<QRCodeSkeleton />}>
+                    <QRCodeComponent value={assetData.asset.id} size={120} />
+                  </Suspense>
                 </div>
                 <div className="text-center text-xs font-mono text-muted-foreground">
                   {assetData.asset.id}
@@ -445,19 +450,29 @@ export default function ScanPage() {
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="grid grid-cols-1 gap-2">
-                  <MoveAssetDialog asset={assetData.asset} rooms={allRooms}>
-                    <Button variant="outline" size="sm" className="w-full justify-start">
-                      <Building className="h-4 w-4 mr-2" />
-                      Di dời đến phòng khác
-                    </Button>
-                  </MoveAssetDialog>
+                  <Suspense fallback={<Button variant="outline" size="sm" className="w-full justify-start" disabled>
+                    <Building className="h-4 w-4 mr-2" />
+                    Đang tải...
+                  </Button>}>
+                    <MoveAssetDialog asset={assetData.asset} rooms={allRooms}>
+                      <Button variant="outline" size="sm" className="w-full justify-start">
+                        <Building className="h-4 w-4 mr-2" />
+                        Di dời đến phòng khác
+                      </Button>
+                    </MoveAssetDialog>
+                  </Suspense>
 
-                  <UpdateStatusDialog asset={assetData.asset}>
-                    <Button variant="outline" size="sm" className="w-full justify-start">
-                      <Settings className="h-4 w-4 mr-2" />
-                      Cập nhật trạng thái
-                    </Button>
-                  </UpdateStatusDialog>
+                  <Suspense fallback={<Button variant="outline" size="sm" className="w-full justify-start" disabled>
+                    <Settings className="h-4 w-4 mr-2" />
+                    Đang tải...
+                  </Button>}>
+                    <UpdateStatusDialog asset={assetData.asset}>
+                      <Button variant="outline" size="sm" className="w-full justify-start">
+                        <Settings className="h-4 w-4 mr-2" />
+                        Cập nhật trạng thái
+                      </Button>
+                    </UpdateStatusDialog>
+                  </Suspense>
                 </div>
               </CardContent>
             </Card>
