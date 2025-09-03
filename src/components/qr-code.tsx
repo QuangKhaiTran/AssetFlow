@@ -16,7 +16,7 @@ export function QRCodeComponent({ value, size = 128 }: QRCodeComponentProps) {
   useEffect(() => {
     if (value) {
       QRCode.toDataURL(value, {
-        errorCorrectionLevel: 'H',
+        errorCorrectionLevel: 'L', // Changed from 'H' to 'L' for a simpler QR code
         margin: 2,
         width: size,
        })
