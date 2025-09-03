@@ -126,8 +126,8 @@ export function RoomDetailClient({ room, initialAssets, manager: _manager, asset
 
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center justify-between gap-y-2">
+            <div className="flex items-center gap-2">
               <CardTitle>{room.name}</CardTitle>
               <div className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Filter className="h-4 w-4" />
@@ -137,7 +137,8 @@ export function RoomDetailClient({ room, initialAssets, manager: _manager, asset
              <div className="flex items-center gap-2">
                  <Button size="sm" variant="outline" onClick={handleGeneratePdf} disabled={isGeneratingPdf || assets.length === 0}>
                     <FileDown className="mr-1.5 h-3.5 w-3.5" />
-                    {isGeneratingPdf ? 'Đang tạo...' : 'Xuất PDF mã QR'}
+                    <span className="hidden sm:inline">Xuất PDF mã QR</span>
+                     <span className="sm:hidden">PDF</span>
                 </Button>
                 <AddAssetDialog roomId={room.id} assetTypes={assetTypes}>
                   <Button size="sm">
