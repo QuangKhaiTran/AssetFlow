@@ -55,6 +55,12 @@ async function handleRequest(request: Request, { params }: { params: { slug: str
   }
 }
 
+export async function GET(
+    request: Request,
+    { params }: { params: { slug: string[] } }
+) {
+    return handleRequest(request, { params });
+}
 
 export async function POST(
   request: Request,
