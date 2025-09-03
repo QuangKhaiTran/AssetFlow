@@ -90,7 +90,7 @@ export async function deleteRoom(formData: z.infer<typeof DeleteRoomSchema>) {
     };
   } catch (error) {
     console.error('Error deleting room:', error);
-    if (error.message === 'Không thể xóa phòng có chứa tài sản.') {
+    if (error instanceof Error && error.message === 'Không thể xóa phòng có chứa tài sản.') {
       throw error;
     }
     throw new Error('Không thể xóa phòng.');
@@ -133,7 +133,6 @@ export async function addAsset(formData: z.infer<typeof AddAssetSchema>): Promis
         revalidatePath('/');
 
         return {
-            message: "Đã thêm tài sản thành công.",
             newAssets,
         };
     } catch (error) {
