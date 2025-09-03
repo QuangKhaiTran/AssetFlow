@@ -1,76 +1,46 @@
-// Basic service worker for PWA caching
-
-const CACHE_NAME = 'assetflow-cache-v1';
-const urlsToCache = [
+// Choose a cache name
+const cacheName = 'assetflow-pwa-cache-v1';
+// List the files to precache
+const precacheResources = [
   '/',
-  '/manifest.json'
-  // Add other critical assets here if needed, e.g., /styles.css, /script.js
+  '/asset-management',
+  '/scan',
+  '/reports',
+  '/users',
+  '/login',
 ];
 
-// Install a service worker
-self.addEventListener('install', event => {
+// When the service worker is installed, open a new cache and add all of our
+// precache resources to it.
+self.addEventListener('install', (event) => {
+  console.log('Service worker install event!');
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('Opened cache');
-        return cache.addAll(urlsToCache);
-      })
-  );
-});
-
-// Cache and return requests
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        // Cache hit - return response
-        if (response) {
-          return response;
-        }
-
-        // Clone the request to use it both for the cache and for the browser
-        const fetchRequest = event.request.clone();
-
-        return fetch(fetchRequest).then(
-          response => {
-            // Check if we received a valid response
-            if (!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
-
-            // Clone the response to use it both for the browser and for the cache
-            const responseToCache = response.clone();
-
-            caches.open(CACHE_NAME)
-              .then(cache => {
-                cache.put(event.request, responseToCache);
-              });
-
-            return response;
-          }
-        );
-      })
-  );
-});
-
-// Update a service worker
-self.addEventListener('activate', event => {
-  const cacheWhitelist = [CACHE_NAME];
-  event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
+    caches.open(cacheName).then((cache) => {
+      return cache.addAll(precacheResources);
     })
   );
 });
 
-// Handle 'skipWaiting' message
-self.addEventListener('message', event => {
+self.addEventListener('activate', (event) => {
+  console.log('Service worker activate event!');
+});
+
+// When there's an incoming fetch request, try and respond with a precached resource,
+// otherwise fall back to the network
+self.addEventListener('fetch', (event) => {
+  console.log('Fetch intercepted for:', event.request.url);
+  event.respondWith(
+    caches.match(event.request).then((cachedResponse) => {
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+      return fetch(event.request);
+    })
+  );
+});
+
+// Update service worker logic
+self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
