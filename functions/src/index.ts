@@ -66,31 +66,66 @@ export const api = onRequest(
         return;
       }
 
-      const {path, method} = req;
-      // Remove '/api/' prefix and split
+      const {path, method, body} = req;
       const pathSegments = path.replace(/^\/api\//, "").split("/").filter(Boolean);
+      
+      logger.info(`API Request: ${method} ${path}`, {body: body});
+      logger.info(`Path segments: ${JSON.stringify(pathSegments)}`);
 
-      logger.info(`API Request: ${method} ${path}`, {structuredData: true});
-      logger.info(`Path segments: ${JSON.stringify(pathSegments)}`, {structuredData: true});
-      
-      const resource = pathSegments[0]; // e.g., 'rooms', 'assets'
-      const id = pathSegments[1]; // e.g., a specific room or asset id, or a sub-resource like 'status'
-      
-      logger.info(`Resource: ${resource}`, {structuredData: true});
-      if (id) {
-          logger.info(`ID/Sub-resource: ${id}`, {structuredData: true});
+      if (pathSegments.length === 0) {
+        res.status(404).json({error: "API endpoint not found"});
+        return;
       }
-
+      
+      const resource = pathSegments[0];
+      
       switch (method) {
       case "POST":
-        await handlePost(resource, req.body, res);
+        // Handle POST /api/rooms and POST /api/assets
+        if (pathSegments.length === 1) {
+          if (resource === "rooms") await addRoom(body, res);
+          else if (resource === "assets") await addAsset(body, res);
+          else res.status(404).json({error: `Resource not found for POST: ${resource}`});
+        } else {
+          res.status(404).json({error: "Invalid POST endpoint"});
+        }
         break;
       case "PUT":
-        await handlePut(pathSegments, req.body, res);
+        // Handle PUT /api/rooms/:id, PUT /api/assets/status, PUT /api/assets/move
+        if (pathSegments.length === 2) {
+          const idOrAction = pathSegments[1];
+          if (resource === "rooms") {
+            await updateRoom(idOrAction, body, res);
+          } else if (resource === "assets" && idOrAction === "status") {
+            await updateAssetStatus(body, res);
+          } else if (resource === "assets" && idOrAction === "move") {
+            await moveAsset(body, res);
+          } else {
+            res.status(404).json({error: `Resource or action not found for PUT: ${resource}/${idOrAction}`});
+          }
+        } else {
+            res.status(404).json({error: "Invalid PUT endpoint"});
+        }
         break;
       case "DELETE":
-        await handleDelete(pathSegments, res);
+        // Handle DELETE /api/rooms/:id
+        if (pathSegments.length === 2) {
+            const id = pathSegments[1];
+            if (resource === "rooms") {
+                await deleteRoom(id, res);
+            } else {
+                res.status(404).json({error: `Resource not found for DELETE: ${resource}`});
+            }
+        } else {
+            res.status(404).json({error: "Invalid DELETE endpoint, ID is required"});
+        }
         break;
+      case "GET":
+         // GET endpoints are not directly used by the app's server actions,
+         // but data fetching is handled by firebase client SDK in lib/data.ts
+         // We can add GET handlers here if direct API access is needed in the future.
+         res.status(405).json({error: "GET method is not implemented for this API"});
+         break;
       default:
         res.status(405).json({error: "Method not allowed"});
       }
@@ -99,92 +134,6 @@ export const api = onRequest(
       res.status(500).json({error: "Internal server error"});
     }
   });
-
-/**
- * Handle POST requests
- * @param {string} resource - The resource to target
- * @param {unknown} body - Request body
- * @param {any} res - Response object
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function handlePost(
-  resource: string,
-  body: unknown,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  res: any
-) {
-  logger.info(`Handling POST for resource: '${resource}'`, {structuredData: true});
-
-  switch (resource) {
-  case "rooms":
-    await addRoom(body, res);
-    break;
-  case "assets":
-    await addAsset(body, res);
-    break;
-  default:
-    logger.error(`POST Resource not found: '${resource}'`, {structuredData: true});
-    res.status(404).json({error: "Resource not found"});
-  }
-}
-
-/**
- * Handle PUT requests
- * @param {string[]} pathSegments - URL path segments
- * @param {unknown} body - Request body
- * @param {any} res - Response object
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function handlePut(pathSegments: string[], body: unknown, res: any) {
-  const resource = pathSegments[0];
-  const idOrAction = pathSegments[1];
-
-  switch (resource) {
-  case "rooms":
-    if (idOrAction) {
-      await updateRoom(idOrAction, body, res);
-    } else {
-      res.status(400).json({error: "Room ID is required"});
-    }
-    break;
-  case "assets":
-    if (idOrAction === "status") {
-        await updateAssetStatus(body, res);
-    } else if (idOrAction === "move") {
-        await moveAsset(body, res);
-    } else {
-        res.status(404).json({error: "Action not found for assets"});
-    }
-    break;
-  default:
-    res.status(404).json({error: "Resource not found"});
-  }
-}
-
-/**
- * Handle DELETE requests
- * @param {string[]} pathSegments - URL path segments
- * @param {any} res - Response object
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function handleDelete(pathSegments: string[], res: any) {
-  const resource = pathSegments[0];
-  const id = pathSegments[1];
-
-  if (!id) {
-    res.status(400).json({error: "ID is required"});
-    return;
-  }
-
-  switch (resource) {
-  case "rooms":
-    await deleteRoom(id, res);
-    break;
-  default:
-    res.status(404).json({error: "Resource not found"});
-  }
-}
-
 
 /**
  * Add a new room
