@@ -69,8 +69,7 @@ export const api = onRequest(
       const {path, method, body} = req;
       const pathSegments = path.replace(/^\/api\//, "").split("/").filter(Boolean);
       
-      logger.info(`API Request: ${method} ${path}`, {body: body});
-      logger.info(`Path segments: ${JSON.stringify(pathSegments)}`);
+      logger.info(`API Request Received: ${method} ${path}`, {body, pathSegments});
 
       if (pathSegments.length === 0) {
         res.status(404).json({error: "API endpoint not found"});
@@ -78,59 +77,41 @@ export const api = onRequest(
       }
       
       const resource = pathSegments[0];
-      
-      switch (method) {
-      case "POST":
-        // Handle POST /api/rooms and POST /api/assets
-        if (pathSegments.length === 1) {
-          if (resource === "rooms") await addRoom(body, res);
-          else if (resource === "assets") await addAsset(body, res);
-          else res.status(404).json({error: `Resource not found for POST: ${resource}`});
+      const id = pathSegments[1];
+
+      switch (resource) {
+      case "rooms":
+        if (method === "POST" && pathSegments.length === 1) {
+            await addRoom(body, res);
+        } else if (method === "PUT" && pathSegments.length === 2) {
+            await updateRoom(id, body, res);
+        } else if (method === "DELETE" && pathSegments.length === 2) {
+            await deleteRoom(id, res);
         } else {
-          res.status(404).json({error: "Invalid POST endpoint"});
+            res.status(404).json({error: `Invalid endpoint for resource 'rooms': ${method} ${path}`});
         }
         break;
-      case "PUT":
-        // Handle PUT /api/rooms/:id, PUT /api/assets/status, PUT /api/assets/move
-        if (pathSegments.length === 2) {
-          const idOrAction = pathSegments[1];
-          if (resource === "rooms") {
-            await updateRoom(idOrAction, body, res);
-          } else if (resource === "assets" && idOrAction === "status") {
-            await updateAssetStatus(body, res);
-          } else if (resource === "assets" && idOrAction === "move") {
-            await moveAsset(body, res);
-          } else {
-            res.status(404).json({error: `Resource or action not found for PUT: ${resource}/${idOrAction}`});
-          }
-        } else {
-            res.status(404).json({error: "Invalid PUT endpoint"});
-        }
-        break;
-      case "DELETE":
-        // Handle DELETE /api/rooms/:id
-        if (pathSegments.length === 2) {
-            const id = pathSegments[1];
-            if (resource === "rooms") {
-                await deleteRoom(id, res);
+      case "assets":
+        if (method === "POST" && pathSegments.length === 1) {
+            await addAsset(body, res);
+        } else if (method === "PUT" && pathSegments.length === 2) {
+            const action = pathSegments[1];
+            if (action === "status") {
+                await updateAssetStatus(body, res);
+            } else if (action === "move") {
+                await moveAsset(body, res);
             } else {
-                res.status(404).json({error: `Resource not found for DELETE: ${resource}`});
+                res.status(404).json({error: `Invalid action for resource 'assets': ${action}`});
             }
         } else {
-            res.status(404).json({error: "Invalid DELETE endpoint, ID is required"});
+            res.status(404).json({error: `Invalid endpoint for resource 'assets': ${method} ${path}`});
         }
         break;
-      case "GET":
-         // GET endpoints are not directly used by the app's server actions,
-         // but data fetching is handled by firebase client SDK in lib/data.ts
-         // We can add GET handlers here if direct API access is needed in the future.
-         res.status(405).json({error: "GET method is not implemented for this API"});
-         break;
       default:
-        res.status(405).json({error: "Method not allowed"});
+        res.status(404).json({error: `Resource '${resource}' not found.`});
       }
     } catch (error) {
-      logger.error("API Error:", error);
+      logger.error("API Global Error:", error);
       res.status(500).json({error: "Internal server error"});
     }
   });
@@ -316,3 +297,5 @@ async function moveAsset(data: unknown, res: any) {
     }
   }
 }
+
+    
