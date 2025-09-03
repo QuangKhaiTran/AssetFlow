@@ -18,11 +18,6 @@ const menuItems = [
     icon: LayoutDashboard,
   },
   {
-    href: "/asset-management",
-    label: "Quản lý",
-    icon: ClipboardList,
-  },
-  {
     href: "/scan",
     label: "Quét QR",
     icon: QrCode,
@@ -33,8 +28,8 @@ const menuItems = [
     icon: FileText,
   },
   {
-    href: "/users",
-    label: "Người dùng",
+    href: "/maintenance",
+    label: "Bảo trì",
     icon: Users,
   }
 ];
@@ -44,7 +39,7 @@ export function BottomNavigation() {
 
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 h-14 bg-card border-t z-20">
-      <div className="grid h-full grid-cols-5">
+      <div className="grid h-full grid-cols-4">
         {menuItems.map((item) => {
           const isActive = pathname === item.href || (item.href === "/" && pathname.startsWith("/rooms")) || (item.href === "/" && pathname.startsWith("/assets"));
           return (

@@ -26,11 +26,6 @@ const menuItems = [
     icon: LayoutDashboard,
   },
   {
-    href: "/asset-management",
-    label: "Quản lý",
-    icon: ClipboardList,
-  },
-  {
     href: "/scan",
     label: "Quét QR",
     icon: QrCode,
@@ -41,9 +36,9 @@ const menuItems = [
     icon: FileText,
   },
   {
-    href: "/users",
-    label: "Người dùng",
-    icon: Users,
+    href: "/maintenance",
+    label: "Bảo trì",
+    icon: Bot,
   }
 ];
 
@@ -52,14 +47,6 @@ const pageConfig: Record<string, { title: string; icon: React.ElementType }> = {
     title: "Tổng quan",
     icon: LayoutDashboard,
   },
-  "/asset-management": {
-    title: "Quản lý loại tài sản",
-    icon: ClipboardList,
-  },
-   "/asset-types": {
-    title: "Chi tiết loại tài sản",
-    icon: ClipboardList,
-  },
   "/scan": {
     title: "Quét mã QR",
     icon: QrCode,
@@ -67,10 +54,6 @@ const pageConfig: Record<string, { title: string; icon: React.ElementType }> = {
   "/reports": {
     title: "Báo cáo",
     icon: FileText,
-  },
-  "/users": {
-    title: "Quản lý người dùng",
-    icon: Users,
   },
    "/maintenance": {
     title: "Bảo trì dự đoán",
@@ -99,12 +82,7 @@ const PageTitle = () => {
     }
   
     if (!config) {
-        // Fallback for paths like /asset-types/[id]
-        if (pathname.startsWith('/asset-types/')) {
-            config = pageConfig['/asset-types'];
-        } else {
-            return null;
-        }
+        return null;
     }
   
     const Icon = config.icon;

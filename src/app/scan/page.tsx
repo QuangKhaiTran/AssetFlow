@@ -8,8 +8,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { getAssetById, getRoomById, getUserById, getAssetTypeById } from '@/lib/data';
-import { type Asset, type Room, type User as UserType, type AssetType, type AssetStatus } from '@/lib/types';
+import { getAssetById, getRoomById } from '@/lib/data';
+import { type Asset, type Room, type AssetStatus } from '@/lib/types';
 import { QRCodeComponent } from '@/components/qr-code';
 
 const statusConfig: Record<AssetStatus, { icon: React.ElementType, color: string }> = {
@@ -32,8 +32,6 @@ export default function ScanPage() {
   const [assetData, setAssetData] = useState<{
     asset: Asset;
     room: Room | null;
-    manager: UserType | null;
-    assetType: AssetType | null;
   } | null>(null);
   const router = useRouter();
   const { toast } = useToast();
@@ -182,19 +180,11 @@ export default function ScanPage() {
         }
         
         // Fetch related information
-        const [room, assetType] = await Promise.all([
-          getRoomById(asset.roomId),
-          getAssetTypeById(asset.assetTypeId)
-        ]);
-        
-        // Fetch manager if room exists
-        const manager = room ? await getUserById(room.managerId) : null;
+        const room = await getRoomById(asset.roomId)
         
         setAssetData({
           asset,
           room: room || null,
-          manager: manager || null,
-          assetType: assetType || null
         });
         
         toast({
@@ -331,14 +321,6 @@ export default function ScanPage() {
                 </div>
               </div>
               
-              {/* Asset Type */}
-              {assetData.assetType && (
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="text-muted-foreground">Loại tài sản:</span>
-                  <span className="font-medium">{assetData.assetType.name}</span>
-                </div>
-              )}
-              
               {/* Room Information */}
               {assetData.room && (
                 <div className="space-y-2">
@@ -348,13 +330,11 @@ export default function ScanPage() {
                     <span className="font-medium">{assetData.room.name}</span>
                   </div>
                   
-                  {assetData.manager && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <User className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-muted-foreground">Người quản lý:</span>
-                      <span className="font-medium">{assetData.manager.name}</span>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2 text-sm">
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-muted-foreground">Người quản lý:</span>
+                    <span className="font-medium">{assetData.room.managerName}</span>
+                  </div>
                 </div>
               )}
               
@@ -406,5 +386,3 @@ export default function ScanPage() {
     </div>
   );
 }
-
-    

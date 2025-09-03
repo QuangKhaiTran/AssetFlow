@@ -27,19 +27,18 @@ const setCorsHeaders = (res: any) => {
 // Schema definitions
 const AddRoomSchema = z.object({
   name: z.string().min(1),
-  managerId: z.string().min(1),
+  managerName: z.string().min(1),
 });
 
 const UpdateRoomSchema = z.object({
   name: z.string().min(1).optional(),
-  managerId: z.string().min(1).optional(),
+  managerName: z.string().min(1).optional(),
 });
 
 const AddAssetSchema = z.object({
   name: z.string().min(1),
   quantity: z.number().int().min(1),
   roomId: z.string().min(1),
-  assetTypeId: z.string().min(1),
 });
 
 const UpdateAssetStatusSchema = z.object({
@@ -50,14 +49,6 @@ const UpdateAssetStatusSchema = z.object({
 const MoveAssetSchema = z.object({
   assetId: z.string().min(1),
   newRoomId: z.string().min(1),
-});
-
-const AddAssetTypeSchema = z.object({
-  name: z.string().min(1),
-});
-
-const AddUserSchema = z.object({
-  name: z.string().min(1),
 });
 
 /**
@@ -122,12 +113,6 @@ async function handlePost(
     break;
   case "assets":
     await addAsset(body, res);
-    break;
-  case "asset-types":
-    await addAssetType(body, res);
-    break;
-  case "users":
-    await addUser(body, res);
     break;
   default:
     logger.error(`Endpoint not found: '${endpoint}'`, {structuredData: true});
@@ -202,11 +187,11 @@ async function handleDelete(pathSegments: string[], res: any) {
 async function addRoom(data: unknown, res: any) {
   try {
     const validatedData = AddRoomSchema.parse(data);
-    const {name, managerId} = validatedData;
+    const {name, managerName} = validatedData;
 
     const docRef = await db.collection("rooms").add({
       name,
-      managerId,
+      managerName,
     });
 
     res.status(201).json({
@@ -284,7 +269,7 @@ async function deleteRoom(id: string, res: any) {
 async function addAsset(data: unknown, res: any) {
   try {
     const validatedData = AddAssetSchema.parse(data);
-    const {name, quantity, roomId, assetTypeId} = validatedData;
+    const {name, quantity, roomId} = validatedData;
 
     const batch = db.batch();
     const newAssets: {id: string; name: string}[] = [];
@@ -298,7 +283,6 @@ async function addAsset(data: unknown, res: any) {
         roomId,
         status: "Đang sử dụng",
         dateAdded: new Date().toISOString().split("T")[0],
-        assetTypeId,
       });
 
       newAssets.push({id: assetRef.id, name: assetName});
@@ -356,52 +340,6 @@ async function moveAsset(data: unknown, res: any) {
     });
   } catch (error) {
     logger.error("Error moving asset:", error);
-    res.status(400).json({error: "Dữ liệu không hợp lệ."});
-  }
-}
-
-/**
- * Add a new asset type
- * @param {unknown} data - Request data
- * @param {any} res - Response object
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function addAssetType(data: unknown, res: any) {
-  try {
-    const validatedData = AddAssetTypeSchema.parse(data);
-    const {name} = validatedData;
-
-    const docRef = await db.collection("assetTypes").add({name});
-
-    res.status(201).json({
-      message: "Đã thêm loại tài sản thành công.",
-      id: docRef.id,
-    });
-  } catch (error) {
-    logger.error("Error adding asset type:", error);
-    res.status(400).json({error: "Dữ liệu không hợp lệ."});
-  }
-}
-
-/**
- * Add a new user
- * @param {unknown} data - Request data
- * @param {any} res - Response object
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function addUser(data: unknown, res: any) {
-  try {
-    const validatedData = AddUserSchema.parse(data);
-    const {name} = validatedData;
-
-    const docRef = await db.collection("users").add({name});
-
-    res.status(201).json({
-      message: "Đã thêm người dùng thành công.",
-      id: docRef.id,
-    });
-  } catch (error) {
-    logger.error("Error adding user:", error);
     res.status(400).json({error: "Dữ liệu không hợp lệ."});
   }
 }

@@ -9,7 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useRouter } from "next/navigation";
-import { type Room, type User, type Asset } from "@/lib/types";
+import { type Room, type Asset } from "@/lib/types";
 import { MoreVertical, Edit, Trash } from "lucide-react";
 import { Button } from "./ui/button";
 import {
@@ -24,16 +24,11 @@ import { DeleteRoomDialog } from "./delete-room-dialog";
 
 interface RoomsTableProps {
   rooms: Room[];
-  users: User[];
   assets: Asset[];
 }
 
-export function RoomsTable({ rooms, users, assets }: RoomsTableProps) {
+export function RoomsTable({ rooms, assets }: RoomsTableProps) {
   const router = useRouter();
-
-  const getManagerName = (managerId: string) => {
-    return users.find((user) => user.id === managerId)?.name || "N/A";
-  };
 
   const getAssetCountForRoom = (roomId: string) => {
     return assets.filter((asset) => asset.roomId === roomId).length;
@@ -65,7 +60,7 @@ export function RoomsTable({ rooms, users, assets }: RoomsTableProps) {
               className="text-xs cursor-pointer"
               onClick={() => router.push(`/rooms/${room.id}`)}
             >
-              {getManagerName(room.managerId)}
+              {room.managerName}
             </TableCell>
             <TableCell 
               className="text-center cursor-pointer"
@@ -83,7 +78,7 @@ export function RoomsTable({ rooms, users, assets }: RoomsTableProps) {
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <EditRoomDialog room={room} users={users}>
+                        <EditRoomDialog room={room}>
                             <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                                 <Edit className="mr-2 h-4 w-4" />
                                 <span>Chỉnh sửa</span>

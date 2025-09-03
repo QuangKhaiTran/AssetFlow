@@ -24,20 +24,13 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
 import { addAsset } from '@/lib/actions';
-import { type Asset, type AssetType } from '@/lib/types';
+import { type Asset } from '@/lib/types';
 import { PrintQRCodesDialog } from './print-qr-codes-dialog';
 
 const formSchema = z.object({
-  assetTypeId: z.string().min(1, 'Vui lòng chọn loại tài sản.'),
+  name: z.string().min(1, 'Tên tài sản là bắt buộc.'),
   quantity: z.coerce.number().int().min(1, 'Số lượng phải ít nhất là 1.'),
 });
 
@@ -46,10 +39,9 @@ type AddAssetFormValues = z.infer<typeof formSchema>;
 interface AddAssetDialogProps {
   children: React.ReactNode;
   roomId: string;
-  assetTypes: AssetType[];
 }
 
-export function AddAssetDialog({ children, roomId, assetTypes }: AddAssetDialogProps) {
+export function AddAssetDialog({ children, roomId }: AddAssetDialogProps) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [newlyAddedAssets, setNewlyAddedAssets] = useState<Pick<Asset, 'id' | 'name'>[]>([]);
@@ -59,7 +51,7 @@ export function AddAssetDialog({ children, roomId, assetTypes }: AddAssetDialogP
   const form = useForm<AddAssetFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      assetTypeId: '',
+      name: '',
       quantity: 1,
     },
   });
@@ -67,17 +59,15 @@ export function AddAssetDialog({ children, roomId, assetTypes }: AddAssetDialogP
   const onSubmit: SubmitHandler<AddAssetFormValues> = async (data) => {
     setIsLoading(true);
     try {
-      const assetTypeName = assetTypes.find(t => t.id === data.assetTypeId)?.name || '';
       const result = await addAsset({
-        name: assetTypeName,
+        name: data.name,
         quantity: data.quantity,
         roomId: roomId,
-        assetTypeId: data.assetTypeId,
       });
       
       toast({
         title: 'Thành công',
-        description: `Đã thêm ${data.quantity} tài sản "${assetTypeName}".`,
+        description: `Đã thêm ${data.quantity} tài sản "${data.name}".`,
       });
 
       form.reset();
@@ -109,30 +99,19 @@ export function AddAssetDialog({ children, roomId, assetTypes }: AddAssetDialogP
               <DialogHeader>
                 <DialogTitle>Thêm tài sản mới</DialogTitle>
                 <DialogDescription>
-                  Chọn loại tài sản và nhập số lượng. Hệ thống sẽ tạo mã QR tương ứng.
+                  Nhập tên tài sản và số lượng. Hệ thống sẽ tạo mã QR tương ứng.
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <FormField
                   control={form.control}
-                  name="assetTypeId"
+                  name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Loại tài sản</FormLabel>
-                       <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Chọn một loại tài sản" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {assetTypes.map((type) => (
-                              <SelectItem key={type.id} value={type.id}>
-                                {type.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                      <FormLabel>Tên tài sản</FormLabel>
+                       <FormControl>
+                        <Input placeholder="ví dụ: Bàn học sinh" {...field} />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}

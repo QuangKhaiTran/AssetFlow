@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Calendar, PlusCircle, CheckCircle, Wrench, XCircle, Trash2, FileDown, Search, Filter, X, ChevronDown, ChevronUp, MoreVertical, Edit, Trash } from 'lucide-react';
-import { type AssetStatus, type Room, type Asset, type AssetType, type User as UserType } from '@/lib/types';
+import { type AssetStatus, type Room, type Asset } from '@/lib/types';
 import { AddAssetDialog } from '@/components/add-asset-dialog';
 import { QRCodeComponent } from '@/components/qr-code';
 import { Input } from '@/components/ui/input';
@@ -53,7 +53,7 @@ const statusConfig: Record<AssetStatus, { icon: React.ElementType, color: string
     'Đã thanh lý': { icon: Trash2, color: 'text-gray-500' },
 };
 
-export function RoomDetailClient({ room, initialAssets, manager, assetTypes, allUsers }: { room: Room, initialAssets: Asset[], manager: UserType | null, assetTypes: AssetType[], allUsers: UserType[] }) {
+export function RoomDetailClient({ room, initialAssets }: { room: Room, initialAssets: Asset[] }) {
   const [assets, setAssets] = useState(initialAssets);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -148,7 +148,7 @@ export function RoomDetailClient({ room, initialAssets, manager, assetTypes, all
                     <span className="hidden sm:inline">Xuất PDF mã QR</span>
                      <span className="sm:hidden">PDF</span>
                 </Button>
-                <AddAssetDialog roomId={room.id} assetTypes={assetTypes}>
+                <AddAssetDialog roomId={room.id}>
                   <Button size="sm">
                       <PlusCircle className="mr-1.5 h-3.5 w-3.5" />
                       Thêm
@@ -161,7 +161,7 @@ export function RoomDetailClient({ room, initialAssets, manager, assetTypes, all
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <EditRoomDialog room={room} users={allUsers}>
+                        <EditRoomDialog room={room}>
                             <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                                 <Edit className="mr-2 h-4 w-4" />
                                 <span>Chỉnh sửa</span>

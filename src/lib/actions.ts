@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { type Asset, type AssetStatus } from './types';
+import { type Asset } from './types';
 
 // Helper to construct API URL
 const getApiUrl = (endpoint: string) => {
@@ -14,7 +14,7 @@ const getApiUrl = (endpoint: string) => {
 // --- ROOM ACTIONS ---
 const AddRoomSchema = z.object({
   name: z.string().min(1, 'Tên phòng là bắt buộc.'),
-  managerId: z.string().min(1, 'Vui lòng chọn người quản lý.'),
+  managerName: z.string().min(1, 'Tên người quản lý là bắt buộc.'),
 });
 export async function addRoom(formData: z.infer<typeof AddRoomSchema>) {
   const validatedData = AddRoomSchema.safeParse(formData);
@@ -34,7 +34,7 @@ export async function addRoom(formData: z.infer<typeof AddRoomSchema>) {
 const UpdateRoomSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1, 'Tên phòng là bắt buộc.'),
-  managerId: z.string().min(1, 'Vui lòng chọn người quản lý.'),
+  managerName: z.string().min(1, 'Tên người quản lý là bắt buộc.'),
 });
 export async function updateRoom(formData: z.infer<typeof UpdateRoomSchema>) {
   const validatedData = UpdateRoomSchema.safeParse(formData);
@@ -74,10 +74,9 @@ export async function deleteRoom(formData: z.infer<typeof DeleteRoomSchema>) {
 
 // --- ASSET ACTIONS ---
 const AddAssetSchema = z.object({
-    name: z.string().min(1),
+    name: z.string().min(1, 'Tên tài sản là bắt buộc.'),
     quantity: z.number().int().min(1),
     roomId: z.string().min(1),
-    assetTypeId: z.string().min(1),
 });
 export async function addAsset(formData: z.infer<typeof AddAssetSchema>): Promise<{ newAssets: Pick<Asset, 'id' | 'name'>[] }> {
     const validatedData = AddAssetSchema.safeParse(formData);
@@ -91,7 +90,6 @@ export async function addAsset(formData: z.infer<typeof AddAssetSchema>): Promis
     if (!res.ok) throw new Error('Không thể thêm tài sản.');
 
     revalidatePath(`/rooms/${validatedData.data.roomId}`);
-    revalidatePath('/asset-management');
     revalidatePath('/');
     return await res.json();
 }
@@ -114,7 +112,6 @@ export async function updateAssetStatus(formData: z.infer<typeof UpdateAssetStat
     
     revalidatePath(`/assets/${validatedData.data.assetId}`);
     revalidatePath('/'); 
-    revalidatePath('/asset-management');
     revalidatePath('/reports');
     return await res.json();
 }
@@ -139,44 +136,4 @@ export async function moveAsset(formData: z.infer<typeof MoveAssetSchema>) {
     revalidatePath(`/rooms/${validatedData.data.newRoomId}`);
     revalidatePath('/'); 
     return await res.json();
-}
-
-
-// --- ASSET TYPE ACTIONS ---
-const AddAssetTypeSchema = z.object({
-  name: z.string().min(1, 'Tên loại tài sản là bắt buộc.'),
-});
-export async function addAssetType(formData: z.infer<typeof AddAssetTypeSchema>) {
-  const validatedData = AddAssetTypeSchema.safeParse(formData);
-  if (!validatedData.success) throw new Error('Dữ liệu không hợp lệ.');
-  
-  const res = await fetch(getApiUrl('asset-types'), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(validatedData.data),
-  });
-  if (!res.ok) throw new Error('Không thể thêm loại tài sản.');
-
-  revalidatePath('/asset-management');
-  return await res.json();
-}
-
-
-// --- USER ACTIONS ---
-const AddUserSchema = z.object({
-  name: z.string().min(1, 'Tên người dùng là bắt buộc.'),
-});
-export async function addUser(formData: z.infer<typeof AddUserSchema>) {
-  const validatedData = AddUserSchema.safeParse(formData);
-  if (!validatedData.success) throw new Error('Dữ liệu không hợp lệ.');
-  
-  const res = await fetch(getApiUrl('users'), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(validatedData.data),
-  });
-  if (!res.ok) throw new Error('Không thể thêm người dùng.');
-
-  revalidatePath('/users');
-  return await res.json();
 }

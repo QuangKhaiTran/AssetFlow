@@ -1,4 +1,4 @@
-import { getAssetById, getRoomById, getUserById, getRooms } from '@/lib/data';
+import { getAssetById, getRoomById, getRooms } from '@/lib/data';
 import { notFound } from 'next/navigation';
 import {
   Card,
@@ -32,7 +32,6 @@ export default async function AssetDetailPage({ params }: { params: Promise<{ id
   }
 
   const room = await getRoomById(asset.roomId);
-  const manager = room ? await getUserById(room.managerId) : null;
   const { icon: Icon, color } = statusConfig[asset.status];
   const allRooms = await getRooms();
 
@@ -73,7 +72,7 @@ export default async function AssetDetailPage({ params }: { params: Promise<{ id
                         <div className="flex items-center gap-1.5 text-muted-foreground">
                             <User className="h-3.5 w-3.5" />
                             <span>Người quản lý:</span>
-                            <span className="font-medium text-foreground">{manager?.name}</span>
+                            <span className="font-medium text-foreground">{room?.managerName}</span>
                         </div>
                     </div>
                      <div className="flex items-center gap-2">

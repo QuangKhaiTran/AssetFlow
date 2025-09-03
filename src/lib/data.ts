@@ -1,36 +1,8 @@
-import { type Asset, type Room, type User, type AssetType } from "./types";
+import { type Asset, type Room } from "./types";
 import { db } from './firebase';
 import { collection, getDocs, doc, getDoc, query, where } from 'firebase/firestore';
 
 // --- Các hàm tương tác với Firestore ---
-
-export async function getUsers(): Promise<User[]> {
-  try {
-    const usersCol = collection(db, 'users');
-    const userSnapshot = await getDocs(usersCol);
-    const userList = userSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as User));
-    // Sắp xếp người dùng theo tên để đảm bảo thứ tự nhất quán
-    return userList.sort((a, b) => a.name.localeCompare(b.name));
-  } catch (error) {
-    console.error("Lỗi khi lấy danh sách người dùng:", error);
-    return [];
-  }
-}
-
-export async function getUserById(id: string): Promise<User | null> {
-    try {
-        if (!id) return null;
-        const userDocRef = doc(db, 'users', id);
-        const userSnap = await getDoc(userDocRef);
-        if (userSnap.exists()) {
-            return { id: userSnap.id, ...userSnap.data() } as User;
-        }
-        return null;
-    } catch (error) {
-        console.error("Lỗi khi lấy thông tin người dùng:", error);
-        return null;
-    }
-}
 
 export async function getRooms(): Promise<Room[]> {
   try {
@@ -98,33 +70,5 @@ export async function getAssetsByRoomId(roomId: string): Promise<Asset[]> {
     } catch (error) {
         console.error(`Lỗi khi lấy tài sản cho phòng ${roomId}:`, error);
         return [];
-    }
-}
-
-export async function getAssetTypes(): Promise<AssetType[]> {
-    try {
-        const assetTypesCol = collection(db, 'assetTypes');
-        const assetTypeSnapshot = await getDocs(assetTypesCol);
-        const assetTypeList = assetTypeSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AssetType));
-        // Sắp xếp loại tài sản theo tên
-        return assetTypeList.sort((a,b) => a.name.localeCompare(b.name));
-    } catch (error) {
-        console.error("Lỗi khi lấy danh sách loại tài sản:", error);
-        return [];
-    }
-}
-
-export async function getAssetTypeById(id: string): Promise<AssetType | null> {
-    try {
-        if (!id) return null;
-        const assetTypeDocRef = doc(db, 'assetTypes', id);
-        const assetTypeSnap = await getDoc(assetTypeDocRef);
-        if (assetTypeSnap.exists()) {
-            return { id: assetTypeSnap.id, ...assetTypeSnap.data() } as AssetType;
-        }
-        return null;
-    } catch (error) {
-        console.error("Lỗi khi lấy thông tin loại tài sản:", error);
-        return null;
     }
 }
